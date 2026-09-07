@@ -1,0 +1,17 @@
+{
+  "name": "RealmRaiders.CharacterMotionProfiles.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.CharacterMotionProfiles.Tests",
+  "references": [
+    "RealmRaiders.ModuleContracts",
+    "RealmRaiders.CharacterMotionProfiles"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
