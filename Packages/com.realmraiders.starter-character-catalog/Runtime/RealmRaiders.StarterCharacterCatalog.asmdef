@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.StarterCharacterCatalog",
+  "rootNamespace": "RealmRaiders.Modules.StarterCharacterCatalog",
+  "references": [
+    "RealmRaiders.ModuleContracts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

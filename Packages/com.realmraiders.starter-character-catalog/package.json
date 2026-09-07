@@ -1,0 +1,10 @@
+{
+  "name": "com.realmraiders.starter-character-catalog",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Starter Character Catalogue",
+  "description": "A passive catalogue of the current Realm Raiders character archetypes.",
+  "unity": "6000.6",
+  "author": {
+    "name": "Realm Raiders"
+  }
+}
