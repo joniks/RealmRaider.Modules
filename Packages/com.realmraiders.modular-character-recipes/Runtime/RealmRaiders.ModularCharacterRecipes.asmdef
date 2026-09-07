@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.ModularCharacterRecipes",
+  "rootNamespace": "RealmRaiders.Modules.CharacterRecipes",
+  "references": [
+    "RealmRaiders.ModuleContracts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
