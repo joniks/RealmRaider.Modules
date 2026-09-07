@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.CharacterVisualTuning.EditorTests",
+  "rootNamespace": "RealmRaiders.CharacterVisualTuning.Tests",
+  "references": [
+    "RealmRaiders.CharacterVisualTuning"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
