@@ -1,0 +1,16 @@
+# Unity-generated content
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# IDE and OS files
+.idea/
+.vs/
+.vscode/
+*.csproj
+*.sln
+.DS_Store
