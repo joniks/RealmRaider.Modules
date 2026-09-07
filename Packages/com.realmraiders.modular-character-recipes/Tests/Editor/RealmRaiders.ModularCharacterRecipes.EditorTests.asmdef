@@ -1,0 +1,17 @@
+{
+  "name": "RealmRaiders.ModularCharacterRecipes.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.CharacterRecipes.Tests",
+  "references": [
+    "RealmRaiders.ModuleContracts",
+    "RealmRaiders.ModularCharacterRecipes"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
