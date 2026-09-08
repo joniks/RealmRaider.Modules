@@ -8,6 +8,10 @@ Each profile keeps a no-op `PresentationTransformIntent`. Palette text and posit
 
 The profiles are not automatically discovered, registered, loaded, or connected to runtime characters. They do not perform scene lookup or mutate presentation or gameplay. A future Core-owned adapter and a concrete player-visible use must be commissioned separately before integration.
 
+## Explicit catalogue
+
+`StarterCharacterVisualTuningProvider` explicitly exposes `BloodKnightBaseline` followed by these four existing creature profiles without redefining their payloads. Callers pass providers directly to `CharacterVisualTuningCatalogue.Build`; a successful immutable catalogue sorts profiles by ordinal `profileId` and supports exact case-sensitive profile/source lookup. Null, unreadable, invalid, or duplicate provider/profile/source input returns structured sorted issues and no partial catalogue. The package performs no discovery, filesystem access, Unity lookup, or integration.
+
 ## Visual direction
 
 - Guardian Ent: living bark, restrained moss, and amber eyes.

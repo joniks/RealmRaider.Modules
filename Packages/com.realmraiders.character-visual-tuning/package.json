@@ -1,6 +1,6 @@
 {
   "name": "com.realmraiders.character-visual-tuning",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Realm Raiders Character Visual Tuning",
   "description": "Pure-data character visual tuning profiles and deterministic validation.",
   "unity": "6000.6",
