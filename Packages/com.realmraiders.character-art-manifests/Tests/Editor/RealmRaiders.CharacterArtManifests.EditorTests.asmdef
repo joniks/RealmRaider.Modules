@@ -1,0 +1,17 @@
+{
+  "name": "RealmRaiders.CharacterArtManifests.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.CharacterArtManifests.Tests",
+  "references": [
+    "RealmRaiders.ModuleContracts",
+    "RealmRaiders.CharacterArtManifests"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

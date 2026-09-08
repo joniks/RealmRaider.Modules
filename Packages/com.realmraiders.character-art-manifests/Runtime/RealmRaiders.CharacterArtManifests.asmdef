@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.CharacterArtManifests",
+  "rootNamespace": "RealmRaiders.Modules.CharacterArtManifests",
+  "references": [
+    "RealmRaiders.ModuleContracts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
