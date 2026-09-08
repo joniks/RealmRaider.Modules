@@ -248,11 +248,20 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles
                 return;
             }
 
-            if (!IsAlphaNumeric(value[0]) || !IsAlphaNumeric(value[value.Length - 1]))
+            if (!IsStableId(value))
             {
                 issues.Add(new MotionProfileIssue(MotionProfileIssueCode.InvalidId, path));
                 return;
             }
+        }
+
+        internal static bool IsStableId(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+
+            if (!IsAlphaNumeric(value[0]) || !IsAlphaNumeric(value[value.Length - 1]))
+                return false;
 
             var previousSeparator = false;
             for (var index = 0; index < value.Length; index++)
@@ -260,12 +269,11 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles
                 var character = value[index];
                 var separator = character == '.' || character == '-';
                 if (!IsAlphaNumeric(character) && !separator || separator && previousSeparator)
-                {
-                    issues.Add(new MotionProfileIssue(MotionProfileIssueCode.InvalidId, path));
-                    return;
-                }
+                    return false;
                 previousSeparator = separator;
             }
+
+            return true;
         }
 
         private static bool IsAlphaNumeric(char character)

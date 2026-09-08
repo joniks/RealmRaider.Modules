@@ -1,10 +1,12 @@
-# Character Motion Profile Contracts
+# Character Motion Profile Contracts and Catalogue
 
 ## Purpose
 
 This package defines immutable, passive plain data for the accepted Character Motion Language v1 profile shape. It contains no animation assets, Animator Controllers, clip references, gameplay timings, curves, or speculative Blood Knight/Ent/Brute/Wolf/Hellhound profiles.
 
 The runtime assembly references `RealmRaiders.ModuleContracts` only for `CharacterBodyFamily` and has no Unity engine or game-runtime dependency. It performs no discovery, registration, loading, scene lookup, runtime adapter work, or gameplay mutation.
+
+Version 0.2 adds an explicit deterministic catalogue. `ICharacterMotionProfileProvider` exposes one stable `ModuleId` and a read-only profile collection. Callers pass the complete provider set directly to `CharacterMotionProfileCatalogue.Build`; the package never searches for or instantiates providers.
 
 ## Closed v1 schema
 
@@ -15,6 +17,14 @@ The clip set contains exactly one binding for each fixed key: `idle`, `locomotio
 Rhythm is limited to `neutral`, `sylvan`, or `infernal`. It is descriptive identity only; this package stores no phase duration, playback curve, damage frame, movement, target, invulnerability, cooldown, controller, possession, or death authority.
 
 The root schema is closed. An input adapter must call `ValidateRootFields` and reject missing, duplicate, or unknown fields before constructing a typed profile. Mutable display data, asset/filesystem paths, scene names, timestamps, random seeds, and extension metadata are not accepted profile identity.
+
+## Deterministic catalogue
+
+`Build` snapshots the supplied provider sequence and each profile collection. A successful catalogue exposes profiles sorted by `motionProfileId` with ordinal semantics and serves exact, case-sensitive ID lookup from a prebuilt dictionary. Provider order and per-provider profile order cannot change the final profile order or its sequence of canonical profile hashes. Later changes to caller-owned collections cannot alter a built catalogue.
+
+Catalogue construction is fail-closed: any issue returns no catalogue. Structured issue codes and semantic paths cover null or unreadable provider collections, providers, profile collections and profiles; invalid or duplicate module IDs; schema-invalid profiles; and duplicate motion profile IDs. Invalid profiles retain the underlying `MotionProfileIssueCode` in `ProfileIssueCode`. Issues are sorted deterministically by path, catalogue issue code, and profile issue code.
+
+Provider discovery, reflection, filesystem/network access, singleton/global registration, Unity API, gameplay state, prefab assembly, `Animator`, and concrete clip assets remain outside this contract.
 
 ## Determinism
 
@@ -30,10 +40,10 @@ An eventual separately commissioned Core adapter may explicitly choose a validat
 
 This package does not authorize any rig, animation, model, or source. Source IDs point only to future accepted provenance records. Each asset still requires creator/title/version, direct source, archive checksum, exact licence/legal-code URL, commercial-use confirmation, attribution, modification notes, and selected-file/import records.
 
-## v1 limits
+## v1 schema and v0.2 catalogue limits
 
 - No Unity objects, `Animator`, `AnimationClip`, controllers, assets, curves, transforms, or import settings.
 - No actual family, faction, fallback, or starter-roster profile instances.
 - No gameplay phases/timings, root motion, animation events, damage, movement, targeting, AI, hit detection, dodge/root, health/death, possession, save, or balance authority.
 - No automatic discovery/registry, reflection scan, singleton, service locator, `Resources`, Addressables, filesystem access, scene injection, or runtime adapter.
-- No JSON parser, schema migration, editable metadata, absolute paths, scene aliases, timestamps, random values, or custom extension fields in v0.1.0.
+- No JSON parser, schema migration, editable metadata, absolute paths, scene aliases, timestamps, random values, or custom extension fields in v0.2.0.
