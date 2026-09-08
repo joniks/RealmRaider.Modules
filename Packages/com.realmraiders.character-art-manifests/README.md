@@ -4,7 +4,7 @@
 
 This uninstalled package defines an immutable evidence and import-policy record for one reviewed character-art source. It does not approve a source, discover or download files, read a filesystem, perform a network request, import an asset, construct a Unity object, or change gameplay.
 
-The runtime assembly is plain C#, has `noEngineReferences`, and references `RealmRaiders.ModuleContracts` only for the shared `CharacterBodyFamily`. No concrete third-party or owned-source manifest ships in version 0.1.0.
+The runtime assembly is plain C#, has `noEngineReferences`, and references `RealmRaiders.ModuleContracts` only for the shared `CharacterBodyFamily`. No concrete third-party or owned-source manifest ships in this package.
 
 ## Closed version 1 record
 
@@ -29,9 +29,15 @@ Motion clips are canonicalized into the six-key ordinal order before serializati
 
 Validation is fail-closed: a null or schema-invalid manifest cannot be serialized or hashed. URL checks are syntax-only and make no network request. A syntactically valid URL, licence name, credit, checksum, or path is not proof that the source exists or that its legal and technical claims are true.
 
+## Explicit deterministic catalogue
+
+`ICharacterArtIntakeManifestProvider` exposes one stable module ID and a read-only manifest collection. Callers supply the complete provider sequence directly to `CharacterArtIntakeManifestCatalogue.Build`; the package never finds or creates providers. A successful catalogue snapshots and sorts manifests by `sourceId`, then provides exact ordinal lookup by unique `sourceId` and `characterId`.
+
+Catalogue construction is fail-closed. Null or unreadable providers, collections, and items; invalid or duplicate module IDs; invalid manifests; duplicate source IDs; and ambiguous character IDs return no partial catalogue. Structured issues retain an underlying manifest-validation code when applicable and are sorted deterministically by semantic path and code. Later changes to caller-owned provider or manifest collections cannot alter a built catalogue.
+
 ## Explicit limits
 
-- No provider catalogue, reflection, automatic discovery, global registry, singleton, filesystem/network access, timestamps, random values, environment access, or source acquisition.
+- No reflection, automatic discovery, global registry, singleton, filesystem/network access, timestamps, random values, environment access, or source acquisition.
 - No model, rig, texture, material, animation clip, archive, licence approval, provenance claim, third-party manifest, or download.
 - No Unity object, importer, editor tool, prefab, scene, runtime adapter, gameplay component, collider, root motion, animation event, balance value, or controller authority.
 - A later human-approved intake must independently verify the exact source page, archive, bundled notices and dependencies, commercial/modification/distribution rights, checksum, selected files, technical budgets, and safe import flags before creating a concrete record.
