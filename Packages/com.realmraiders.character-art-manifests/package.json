@@ -1,6 +1,6 @@
 {
   "name": "com.realmraiders.character-art-manifests",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "displayName": "Realm Raiders Character Art Manifests",
   "description": "Passive deterministic contracts for reviewed character-art intake evidence and mobile budgets.",
   "unity": "6000.6",

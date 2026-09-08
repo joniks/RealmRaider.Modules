@@ -35,6 +35,12 @@ Validation is fail-closed: a null or schema-invalid manifest cannot be serialize
 
 Catalogue construction is fail-closed. Null or unreadable providers, collections, and items; invalid or duplicate module IDs; invalid manifests; duplicate source IDs; and ambiguous character IDs return no partial catalogue. Structured issues retain an underlying manifest-validation code when applicable and are sorted deterministically by semantic path and code. Later changes to caller-owned provider or manifest collections cannot alter a built catalogue.
 
+## Adapter-neutral measurement gate
+
+`CharacterArtMeasurementSnapshot` snapshots explicitly supplied post-import measurements without reading an asset or a filesystem. `CharacterArtIntakeComplianceEvaluator` first requires a valid manifest, then compares exact ordinal source and character identities; one measured triangle count for each LOD; renderer, material, texture, and maximum texture-edge counts; prohibited collider, root-motion, and animation-event observations; and exact motion-clip coverage governed by `importAnimations`.
+
+Measurements at a manifest limit pass; negative counts, missing or duplicate LODs, over-budget values, mismatched identities, prohibited observations, or inconsistent animation and clip state fail. Null and unreadable measurement collections become structured failures instead of exceptions. Results and issues are immutable and sorted by ordinal semantic path and issue code, so equivalent collection input order produces the same result. A future Unity or Blender adapter may supply these facts, but no adapter or import authority is part of this package.
+
 ## Explicit limits
 
 - No reflection, automatic discovery, global registry, singleton, filesystem/network access, timestamps, random values, environment access, or source acquisition.
