@@ -1,8 +1,8 @@
 {
   "name": "com.realmraiders.modular-character-recipes",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Realm Raiders Modular Character Recipes",
-  "description": "Passive, deterministic plain-data contracts for modular character recipes.",
+  "description": "Passive deterministic contracts and explicit catalogue construction for modular character recipes.",
   "unity": "6000.6",
   "author": {
     "name": "Realm Raiders"
