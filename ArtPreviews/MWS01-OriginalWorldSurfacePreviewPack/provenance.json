@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "packId": "realmraiders.preview.world-surfaces.mws01.v1",
+  "status": "original-generated-preview",
+  "runtimeStatus": "preview-only-not-approved-for-runtime",
+  "generationTool": "OpenAI built-in image generation",
+  "assets": [
+    {
+      "file": "sylvan-mossy-root-stone-path-preview.png",
+      "faction": "sylvan",
+      "surface": "mossy root-and-stone path",
+      "promptSummary": "Top-down broad mossy stone path with intertwined roots, damp earth seams, and mobile-readable fantasy surface shapes.",
+      "originalGeneratedPreview": true
+    },
+    {
+      "file": "infernal-fractured-basalt-iron-causeway-preview.png",
+      "faction": "infernal",
+      "surface": "fractured basalt-and-iron causeway",
+      "promptSummary": "Top-down broad fractured dark basalt slabs with iron inlays and restrained ember fissures for a mobile-readable fantasy surface.",
+      "originalGeneratedPreview": true
+    }
+  ],
+  "reviewRequired": [
+    "tileability",
+    "Unity import settings",
+    "texture memory and compression budget",
+    "material and renderer budget"
+  ],
+  "nonGoals": [
+    "runtime installation",
+    "third-party source intake",
+    "licence approval",
+    "gameplay authority"
+  ]
+}
