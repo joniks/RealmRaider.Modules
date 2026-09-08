@@ -8,6 +8,8 @@ The runtime assembly references `RealmRaiders.ModuleContracts` only for `Charact
 
 Version 0.2 adds an explicit deterministic catalogue. `ICharacterMotionProfileProvider` exposes one stable `ModuleId` and a read-only profile collection. Callers pass the complete provider set directly to `CharacterMotionProfileCatalogue.Build`; the package never searches for or instantiates providers.
 
+Version 0.3 adds an adapter-neutral compatibility gate. `CharacterMotionTargetRequirements` snapshots an explicit target family, exact rig profile ID, the required six-key clip set, and whether a declared fallback is allowed. `CharacterMotionCompatibilityEvaluator` preserves existing profile-validation issues, then checks exact family/rig compatibility and fallback policy. Its immutable issues have stable semantic paths and signatures sorted with ordinal semantics.
+
 ## Closed v1 schema
 
 A profile contains exactly these root fields in canonical order: `schemaVersion`, `motionProfileId`, `family`, `rigProfileId`, `animatorProfileId`, `clips`, `rhythmProfile`, `fallbackProfileId`, and `sourceIds`.
@@ -26,6 +28,10 @@ Catalogue construction is fail-closed: any issue returns no catalogue. Structure
 
 Provider discovery, reflection, filesystem/network access, singleton/global registration, Unity API, gameplay state, prefab assembly, `Animator`, and concrete clip assets remain outside this contract.
 
+## Deterministic compatibility gate
+
+Compatibility is fail-closed for null, unreadable, or invalid input. The target clip set must contain each of `idle`, `locomotion`, `attack_primary`, `attack_ability`, `hit`, and `death` exactly once; missing, duplicate, and unknown keys are structured failures. Rig comparison uses exact ordinal text, family comparison uses the shared body-family enum, and a target that disallows fallback rejects a profile with a declared fallback ID. The gate does not select a fallback, resolve a clip, inspect a rig, load an asset, or grant animation/gameplay authority.
+
 ## Determinism
 
 - IDs use lowercase ASCII letters/digits with single `.` or `-` separators.
@@ -40,10 +46,10 @@ An eventual separately commissioned Core adapter may explicitly choose a validat
 
 This package does not authorize any rig, animation, model, or source. Source IDs point only to future accepted provenance records. Each asset still requires creator/title/version, direct source, archive checksum, exact licence/legal-code URL, commercial-use confirmation, attribution, modification notes, and selected-file/import records.
 
-## v1 schema and v0.2 catalogue limits
+## v1 schema and v0.3 catalogue/compatibility limits
 
 - No Unity objects, `Animator`, `AnimationClip`, controllers, assets, curves, transforms, or import settings.
 - No actual family, faction, fallback, or starter-roster profile instances.
 - No gameplay phases/timings, root motion, animation events, damage, movement, targeting, AI, hit detection, dodge/root, health/death, possession, save, or balance authority.
 - No automatic discovery/registry, reflection scan, singleton, service locator, `Resources`, Addressables, filesystem access, scene injection, or runtime adapter.
-- No JSON parser, schema migration, editable metadata, absolute paths, scene aliases, timestamps, random values, or custom extension fields in v0.2.0.
+- No JSON parser, schema migration, editable metadata, absolute paths, scene aliases, timestamps, random values, or custom extension fields in v0.3.0.
