@@ -41,6 +41,12 @@ Catalogue construction is fail-closed. Null or unreadable providers, collections
 
 Measurements at a manifest limit pass; negative counts, missing or duplicate LODs, over-budget values, mismatched identities, prohibited observations, or inconsistent animation and clip state fail. Null and unreadable measurement collections become structured failures instead of exceptions. Results and issues are immutable and sorted by ordinal semantic path and issue code, so equivalent collection input order produces the same result. A future Unity or Blender adapter may supply these facts, but no adapter or import authority is part of this package.
 
+## Explicit deterministic batch report
+
+`ICharacterArtIntakeBatchProvider` exposes a stable module ID and a read-only collection of explicit manifest–measurement pairs. `CharacterArtIntakeBatchReport.Build` snapshots all caller collections, rejects unreadable structure and duplicate module, source, or character IDs, and evaluates every uniquely identified pair with `CharacterArtIntakeComplianceEvaluator`. A successful immutable report is sorted by ordinal `sourceId`, preserves each structured compliance issue under `items[sourceId]`, and exposes truthful compliant/noncompliant totals plus exact ordinal lookup by stable source or character ID.
+
+Structural input failures return no partial report. A validly identified but noncompliant pair remains in the report with all of its evaluator issues, so batch totals cannot hide failed intake checks. Callers must provide every provider and item directly; the batch builder performs no discovery or art inspection.
+
 ## Explicit limits
 
 - No reflection, automatic discovery, global registry, singleton, filesystem/network access, timestamps, random values, environment access, or source acquisition.
