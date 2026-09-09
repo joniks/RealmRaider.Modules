@@ -1,8 +1,8 @@
 {
   "name": "com.realmraiders.character-visual-tuning",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "displayName": "Realm Raiders Character Visual Tuning",
-  "description": "Pure-data character visual tuning profiles, deterministic validation, and explicit mobile budget compatibility checks.",
+  "description": "Pure-data character visual tuning profiles with deterministic validation, mobile compatibility and roster-budget evidence.",
   "unity": "6000.6",
   "author": {
     "name": "Realm Raiders"
