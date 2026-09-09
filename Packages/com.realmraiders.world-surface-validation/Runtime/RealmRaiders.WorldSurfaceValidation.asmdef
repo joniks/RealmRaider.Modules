@@ -1,0 +1,8 @@
+{
+  "name": "RealmRaiders.WorldSurfaceValidation",
+  "rootNamespace": "RealmRaiders.Modules.WorldSurfaceValidation",
+  "references": [],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

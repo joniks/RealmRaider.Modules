@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.WorldSurfaceValidation.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.WorldSurfaceValidation.Tests",
+  "references": [
+    "RealmRaiders.WorldSurfaceValidation"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
