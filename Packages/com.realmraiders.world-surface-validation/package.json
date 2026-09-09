@@ -1,8 +1,8 @@
 {
   "name": "com.realmraiders.world-surface-validation",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "Realm Raiders World Surface Validation",
-  "description": "Pure C# deterministic seam analysis contracts for caller-supplied RGBA world-surface pixels.",
+  "description": "Pure C# deterministic seam and mobile preview-budget contracts for caller-supplied world-surface facts.",
   "unity": "6000.6",
   "author": {
     "name": "Realm Raiders"

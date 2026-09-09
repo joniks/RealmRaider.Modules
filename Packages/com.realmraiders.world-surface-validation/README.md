@@ -11,3 +11,9 @@ Each compared edge pair uses `(abs(R1-R2) + abs(G1-G2) + abs(B1-B2) + abs(A1-A2)
 The mean is reported for diagnostics, but the verdict uses the worst edge sample. Equality is intentional: a worst delta of `0.25` passes a `0.25` threshold and fails a `0.249` threshold.
 
 The package reads no files, uses no image library, shader, Unity API, editor API, runtime integration, discovery, or import authority. A caller must obtain pixels and decide how to act on this validation separately.
+
+## Surface preview budget gate
+
+`WorldSurfacePreviewBudgetGate` validates immutable caller-declared metadata for a mobile surface preview. It accepts a non-empty semantic identifier, positive square power-of-two source dimensions, an Android maximum dimension from 1 through 512, Read/Write disabled, mipmaps enabled, and one of these exact ordinal compression labels: `ASTC_6x6` or `ETC2_RGBA8`.
+
+The intended accepted profile is a `1024 × 1024` source with declared Android maximum dimension `512`. The gate does not resize, inspect, decode, import, or modify anything; it only evaluates the supplied facts. Failures are returned in fixed `WorldSurfacePreviewBudgetIssueCode` ordinal order with stable messages, so a later adapter can show evidence without this package gaining Unity or filesystem authority.
