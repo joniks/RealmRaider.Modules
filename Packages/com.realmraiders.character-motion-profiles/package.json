@@ -1,6 +1,6 @@
 {
   "name": "com.realmraiders.character-motion-profiles",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "displayName": "Realm Raiders Character Motion Profiles",
   "description": "Passive deterministic contracts and explicit catalogue construction for character motion profiles.",
   "unity": "6000.6",

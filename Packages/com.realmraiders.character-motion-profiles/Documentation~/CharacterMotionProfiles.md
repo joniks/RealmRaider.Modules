@@ -10,6 +10,8 @@ Version 0.2 adds an explicit deterministic catalogue. `ICharacterMotionProfilePr
 
 Version 0.3 adds an adapter-neutral compatibility gate. `CharacterMotionTargetRequirements` snapshots an explicit target family, exact rig profile ID, the required six-key clip set, and whether a declared fallback is allowed. `CharacterMotionCompatibilityEvaluator` preserves existing profile-validation issues, then checks exact family/rig compatibility and fallback policy. Its immutable issues have stable semantic paths and signatures sorted with ordinal semantics.
 
+Version 0.4 adds `CharacterMotionBindingBatchEvaluator`. It accepts only an explicit, already-built `CharacterMotionProfileCatalogue` and explicit `CharacterMotionBindingRequest` values. Each request names a character, one exact motion profile ID, and `CharacterMotionTargetRequirements`; the batch layer does not select a fallback or search for another profile.
+
 ## Closed v1 schema
 
 A profile contains exactly these root fields in canonical order: `schemaVersion`, `motionProfileId`, `family`, `rigProfileId`, `animatorProfileId`, `clips`, `rhythmProfile`, `fallbackProfileId`, and `sourceIds`.
@@ -32,6 +34,12 @@ Provider discovery, reflection, filesystem/network access, singleton/global regi
 
 Compatibility is fail-closed for null, unreadable, or invalid input. The target clip set must contain each of `idle`, `locomotion`, `attack_primary`, `attack_ability`, `hit`, and `death` exactly once; missing, duplicate, and unknown keys are structured failures. Rig comparison uses exact ordinal text, family comparison uses the shared body-family enum, and a target that disallows fallback rejects a profile with a declared fallback ID. The gate does not select a fallback, resolve a clip, inspect a rig, load an asset, or grant animation/gameplay authority.
 
+## Explicit binding batch gate
+
+The batch evaluator snapshots its request sequence, rejects null or unreadable input, validates character and motion-profile stable IDs, rejects duplicate character bindings, and finds profiles only through the supplied catalogue's exact ordinal lookup. If enumeration fails after yielding items, the partial snapshot is discarded and the result reports only the unreadable collection boundary. It delegates target/profile compatibility to `CharacterMotionCompatibilityEvaluator` and retains its issue code details on each per-character batch issue.
+
+Batch construction is fail-closed: if any request is invalid, missing, duplicate, or incompatible, `Succeeded` is false and `Records` is empty. A successful result exposes immutable records sorted ordinally by `characterId`. It never discovers providers, resolves a starter profile, chooses an automatic fallback, loads an asset, or establishes animation or gameplay authority.
+
 ## Determinism
 
 - IDs use lowercase ASCII letters/digits with single `.` or `-` separators.
@@ -46,10 +54,10 @@ An eventual separately commissioned Core adapter may explicitly choose a validat
 
 This package does not authorize any rig, animation, model, or source. Source IDs point only to future accepted provenance records. Each asset still requires creator/title/version, direct source, archive checksum, exact licence/legal-code URL, commercial-use confirmation, attribution, modification notes, and selected-file/import records.
 
-## v1 schema and v0.3 catalogue/compatibility limits
+## v1 schema and v0.4 catalogue/compatibility/batch limits
 
 - No Unity objects, `Animator`, `AnimationClip`, controllers, assets, curves, transforms, or import settings.
 - No actual family, faction, fallback, or starter-roster profile instances.
 - No gameplay phases/timings, root motion, animation events, damage, movement, targeting, AI, hit detection, dodge/root, health/death, possession, save, or balance authority.
 - No automatic discovery/registry, reflection scan, singleton, service locator, `Resources`, Addressables, filesystem access, scene injection, or runtime adapter.
-- No JSON parser, schema migration, editable metadata, absolute paths, scene aliases, timestamps, random values, or custom extension fields in v0.3.0.
+- No JSON parser, schema migration, editable metadata, absolute paths, scene aliases, timestamps, random values, or custom extension fields in v0.4.0.
