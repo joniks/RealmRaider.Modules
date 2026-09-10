@@ -1,0 +1,13 @@
+{
+  "name": "com.realmraiders.character-procedural-motion",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Character Procedural Motion",
+  "description": "Bounded presentation-only procedural humanoid pose driver.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.character-motion-profiles": "0.5.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

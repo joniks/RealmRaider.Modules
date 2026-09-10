@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.CharacterProceduralMotion",
+  "rootNamespace": "RealmRaiders.Modules.CharacterProceduralMotion",
+  "references": [
+    "RealmRaiders.CharacterMotionProfiles"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": false
+}
