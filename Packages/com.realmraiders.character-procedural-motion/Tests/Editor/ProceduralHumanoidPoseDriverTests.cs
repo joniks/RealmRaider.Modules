@@ -179,8 +179,13 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
             Assert.That(compatibility.Locomotion.UpperArmAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Right));
             Assert.That(compatibility.AsymmetricJumpTakeoff.LeftThighDegrees, Is.EqualTo(-10f));
             Assert.That(compatibility.AsymmetricJumpTakeoff.RightThighDegrees, Is.EqualTo(-10f));
-            Assert.That(bloodKnight.Locomotion.UpperArmDegrees, Is.GreaterThan(compatibility.Locomotion.UpperArmDegrees));
-            Assert.That(bloodKnight.Locomotion.ThighDegrees, Is.GreaterThan(compatibility.Locomotion.ThighDegrees));
+            Assert.That(bloodKnight.Locomotion.UpperArmDegrees, Is.EqualTo(56f));
+            Assert.That(bloodKnight.Locomotion.ThighDegrees, Is.EqualTo(50f));
+            Assert.That(bloodKnight.Locomotion.MaxAdditiveAngleDegrees, Is.EqualTo(60f));
+            Assert.That(bloodKnight.DeepCrouch.LeftThighDegrees, Is.EqualTo(-88f));
+            Assert.That(bloodKnight.DeepCrouch.RightThighDegrees, Is.EqualTo(-88f));
+            Assert.That(bloodKnight.JumpPresentationDurationMultiplier, Is.EqualTo(4f));
+            Assert.That(bloodKnight.TakeoffStraightenDurationMultiplier, Is.EqualTo(3f));
             Assert.That(bloodKnight.Locomotion.UpperArmAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Forward));
             Assert.That(bloodKnight.Locomotion.ThighAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Forward));
             Assert.That(bloodKnight.AsymmetricJumpTakeoff.LeftThighDegrees, Is.EqualTo(-22f));
@@ -254,22 +259,48 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
 
                 driver.Sample(Input(isLocomoting: true), 1f, 0.2f, 1f / 60f);
                 var swing = Mathf.Sin((0.2f + 1f / 60f) * 7.5f);
-                AssertLocalRotation(bones[0], baseline[0], Vector3.forward, 28f * swing);
-                AssertLocalRotation(bones[1], baseline[1], Vector3.forward, -28f * swing);
-                AssertLocalRotation(bones[2], baseline[2], Vector3.forward, -25f * swing);
-                AssertLocalRotation(bones[3], baseline[3], Vector3.forward, 25f * swing);
-                AssertLocalRotation(bones[4], baseline[4], Vector3.forward, 13f * swing);
-                AssertLocalRotation(bones[5], baseline[5], Vector3.forward, -13f * swing);
+                AssertLocalRotation(bones[0], baseline[0], Vector3.forward, 56f * swing);
+                AssertLocalRotation(bones[1], baseline[1], Vector3.forward, -56f * swing);
+                AssertLocalRotation(bones[2], baseline[2], Vector3.forward, -50f * swing);
+                AssertLocalRotation(bones[3], baseline[3], Vector3.forward, 50f * swing);
+                AssertLocalRotation(bones[4], baseline[4], Vector3.forward, 26f * swing);
+                AssertLocalRotation(bones[5], baseline[5], Vector3.forward, -26f * swing);
 
-                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Takeoff), 0f, 0f, 0f);
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Takeoff), 0f, 0f, 0f, float.NaN);
+                AssertLocalRotation(bones[2], baseline[2], Vector3.forward, -88f);
+                AssertLocalRotation(bones[3], baseline[3], Vector3.forward, -88f);
+                AssertLocalRotation(bones[4], baseline[4], Vector3.forward, 80f);
+                AssertLocalRotation(bones[5], baseline[5], Vector3.forward, 80f);
+                Assert.That(AllBoundsRespected(bones, baseline, 90f), Is.True);
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Takeoff), 0f, 0f, 0f, 0.5f);
+                AssertLocalRotation(bones[2], baseline[2], Vector3.forward, -55f);
+                AssertLocalRotation(bones[3], baseline[3], Vector3.forward, -38f);
+                AssertLocalRotation(bones[4], baseline[4], Vector3.forward, 50f);
+                AssertLocalRotation(bones[5], baseline[5], Vector3.forward, 35f);
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Takeoff), 0f, 0f, 0f, 2f);
                 AssertLocalRotation(bones[0], baseline[0], Vector3.forward, -18f);
                 AssertLocalRotation(bones[1], baseline[1], Vector3.forward, -18f);
                 AssertLocalRotation(bones[2], baseline[2], Vector3.forward, -22f);
                 AssertLocalRotation(bones[3], baseline[3], Vector3.forward, 12f);
                 AssertLocalRotation(bones[4], baseline[4], Vector3.forward, 20f);
                 AssertLocalRotation(bones[5], baseline[5], Vector3.forward, -10f);
+                var pushBoundary = Snapshot(bones);
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Falling), 0f, 0f, 0f, float.NaN);
+                Assert.That(Snapshot(bones), Is.EqualTo(pushBoundary));
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Falling), 0f, 0f, 0f, 1f);
+                AssertLocalRotation(bones[0], baseline[0], Vector3.forward, 22f);
+                AssertLocalRotation(bones[2], baseline[2], Vector3.forward, 12f);
+                var fallBoundary = Snapshot(bones);
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Landing), 0f, 0f, 0f, -1f);
+                Assert.That(Snapshot(bones), Is.EqualTo(fallBoundary));
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Landing), 0f, 0f, 0f, 0.5f);
+                AssertLocalRotation(bones[0], baseline[0], Vector3.forward, -10f);
+                AssertLocalRotation(bones[2], baseline[2], Vector3.forward, -22f);
+                AssertLocalRotation(bones[4], baseline[4], Vector3.forward, 24f);
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Landing), 0f, 0f, 0f, 2f);
+                Assert.That(Snapshot(bones), Is.EqualTo(baseline));
                 Assert.That(BonePose.Of(root.transform), Is.EqualTo(rootPose));
-                Assert.That(AllBoundsRespected(bones, baseline), Is.True);
+                Assert.That(AllBoundsRespected(bones, baseline, 60f), Is.True);
 
                 driver.Clear();
                 Assert.That(Snapshot(bones), Is.EqualTo(baseline));
@@ -306,7 +337,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
                 Assert.That(BonePose.Of(defaultRoot.transform), Is.EqualTo(defaultRootPose));
                 Assert.That(BonePose.Of(bloodKnightRoot.transform), Is.EqualTo(bloodKnightRootPose));
                 Assert.That(AllBoundsRespected(defaultBones, defaultBaseline), Is.True);
-                Assert.That(AllBoundsRespected(bloodKnightBones, bloodKnightBaseline), Is.True);
+                Assert.That(AllBoundsRespected(bloodKnightBones, bloodKnightBaseline, 60f), Is.True);
                 Assert.That(RotationMagnitude(bloodKnightBones, bloodKnightBaseline),
                     Is.GreaterThan(RotationMagnitude(defaultBones, defaultBaseline) + 10f));
             }
@@ -379,12 +410,12 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
             return false;
         }
 
-        private static bool AllBoundsRespected(Transform[] bones, BonePose[] baseline)
+        private static bool AllBoundsRespected(Transform[] bones, BonePose[] baseline, float maximum = ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees)
         {
             for (var index = 0; index < bones.Length; index++)
             {
                 if (Quaternion.Angle(bones[index].localRotation, baseline[index].Rotation) >
-                    ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees + 0.001f)
+                    maximum + 0.001f)
                     return false;
                 if (bones[index].localPosition != baseline[index].Position || bones[index].localScale != baseline[index].Scale)
                     return false;

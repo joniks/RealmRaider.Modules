@@ -10,6 +10,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
     public sealed class ProceduralHumanoidPoseDriver
     {
         public const float MaxAdditiveAngleDegrees = 30f;
+        public const float MaxPerPoseAngleDegrees = 90f;
 
         private Transform visualRoot;
         private Transform leftUpperArm;
@@ -97,6 +98,28 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             float presentationClock,
             float deltaTime)
         {
+            SampleInternal(input, normalizedLocomotionSpeed, presentationClock, deltaTime, 1f, true);
+        }
+
+        /// <summary>Samples caller-owned normalized jump progress; this driver has no time authority.</summary>
+        public void Sample(
+            CharacterMotionPresentationInput input,
+            float normalizedLocomotionSpeed,
+            float presentationClock,
+            float deltaTime,
+            float normalizedJumpPresentationProgress)
+        {
+            SampleInternal(input, normalizedLocomotionSpeed, presentationClock, deltaTime, normalizedJumpPresentationProgress, false);
+        }
+
+        private void SampleInternal(
+            CharacterMotionPresentationInput input,
+            float normalizedLocomotionSpeed,
+            float presentationClock,
+            float deltaTime,
+            float normalizedJumpPresentationProgress,
+            bool useLegacyStaticJumpPose)
+        {
             if (!IsBound)
                 return;
 
@@ -104,6 +127,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             var speed = IsFinite(normalizedLocomotionSpeed) ? Mathf.Clamp01(normalizedLocomotionSpeed) : 0f;
             var clock = IsFinite(presentationClock) ? presentationClock : 0f;
             var safeDelta = IsFinite(deltaTime) ? Mathf.Clamp(deltaTime, 0f, 0.1f) : 0f;
+            var jumpProgress = IsFinite(normalizedJumpPresentationProgress) ? Mathf.Clamp01(normalizedJumpPresentationProgress) : 0f;
             var swing = Mathf.Sin((clock + safeDelta) * tuning.SwingCadenceRadiansPerSecond);
 
             switch (CharacterMotionPresentationResolver.Resolve(input))
@@ -115,13 +139,13 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
                     ApplyLocomotion(swing, speed);
                     break;
                 case MotionClipKey.JumpTakeoff:
-                    ApplyJumpTakeoff();
+                    ApplyJumpTakeoff(jumpProgress);
                     break;
                 case MotionClipKey.JumpFall:
-                    ApplyJumpFall();
+                    if (useLegacyStaticJumpPose) ApplyPose(tuning.JumpFall); else ApplyJumpFall(jumpProgress);
                     break;
                 case MotionClipKey.JumpLand:
-                    ApplyJumpLand();
+                    if (useLegacyStaticJumpPose) ApplyPose(tuning.JumpLand); else ApplyJumpLand(jumpProgress);
                     break;
                 case MotionClipKey.AttackPrimary:
                     ApplyPrimaryAttack();
@@ -208,8 +232,8 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
 
         private void ApplyIdle(float swing)
         {
-            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.forward, tuning.IdleArmDegrees * swing);
-            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.forward, -tuning.IdleArmDegrees * swing);
+            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.forward, tuning.IdleArmDegrees * swing, MaxAdditiveAngleDegrees);
+            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.forward, -tuning.IdleArmDegrees * swing, MaxAdditiveAngleDegrees);
         }
 
         private void ApplyLocomotion(float swing, float speed)
@@ -217,38 +241,38 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             var arm = tuning.Locomotion.UpperArmDegrees * speed * swing;
             var thigh = tuning.Locomotion.ThighDegrees * speed * swing;
             var calf = tuning.Locomotion.CalfDegrees * speed * swing;
-            AddRotation(leftUpperArm, leftUpperArmBaseline, Axis(tuning.Locomotion.UpperArmAxis), arm);
-            AddRotation(rightUpperArm, rightUpperArmBaseline, Axis(tuning.Locomotion.UpperArmAxis), -arm);
-            AddRotation(leftThigh, leftThighBaseline, Axis(tuning.Locomotion.ThighAxis), -thigh);
-            AddRotation(rightThigh, rightThighBaseline, Axis(tuning.Locomotion.ThighAxis), thigh);
-            AddRotation(leftCalf, leftCalfBaseline, Axis(tuning.Locomotion.CalfAxis), calf);
-            AddRotation(rightCalf, rightCalfBaseline, Axis(tuning.Locomotion.CalfAxis), -calf);
+            AddRotation(leftUpperArm, leftUpperArmBaseline, Axis(tuning.Locomotion.UpperArmAxis), arm, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(rightUpperArm, rightUpperArmBaseline, Axis(tuning.Locomotion.UpperArmAxis), -arm, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(leftThigh, leftThighBaseline, Axis(tuning.Locomotion.ThighAxis), -thigh, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(rightThigh, rightThighBaseline, Axis(tuning.Locomotion.ThighAxis), thigh, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(leftCalf, leftCalfBaseline, Axis(tuning.Locomotion.CalfAxis), calf, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(rightCalf, rightCalfBaseline, Axis(tuning.Locomotion.CalfAxis), -calf, tuning.Locomotion.MaxAdditiveAngleDegrees);
         }
 
-        private void ApplyJumpTakeoff()
+        private void ApplyJumpTakeoff(float progress)
         {
-            var pose = tuning.AsymmetricJumpTakeoff;
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees, pose.UpperArmAxis);
-            AddRotation(leftThigh, leftThighBaseline, Axis(pose.LeftThighAxis), pose.LeftThighDegrees);
-            AddRotation(rightThigh, rightThighBaseline, Axis(pose.RightThighAxis), pose.RightThighDegrees);
-            AddRotation(leftCalf, leftCalfBaseline, Axis(pose.LeftCalfAxis), pose.LeftCalfDegrees);
-            AddRotation(rightCalf, rightCalfBaseline, Axis(pose.RightCalfAxis), pose.RightCalfDegrees);
+            var crouch = tuning.DeepCrouch;
+            var push = tuning.AsymmetricJumpTakeoff;
+            ApplyTakeoff(progress, crouch, push);
         }
 
-        private void ApplyJumpFall()
+        private void ApplyJumpFall(float progress)
         {
-            ApplyPose(tuning.JumpFall);
+            ApplyTakeoffToPose(progress, tuning.AsymmetricJumpTakeoff, tuning.JumpFall);
         }
 
-        private void ApplyJumpLand()
+        private void ApplyJumpLand(float progress)
         {
-            ApplyPose(tuning.JumpLand);
+            if (progress <= 0.5f)
+                ApplyPoseTransition(tuning.JumpFall, tuning.JumpLand, progress * 2f);
+            else
+                ApplyPose(tuning.JumpLand, 2f - progress * 2f);
         }
 
         private void ApplyPrimaryAttack()
         {
-            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.right, tuning.PrimaryWeaponArmDegrees);
-            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.right, tuning.PrimarySupportArmDegrees);
+            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.right, tuning.PrimaryWeaponArmDegrees, MaxAdditiveAngleDegrees);
+            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.right, tuning.PrimarySupportArmDegrees, MaxAdditiveAngleDegrees);
         }
 
         private void ApplyAbilityAttack()
@@ -266,11 +290,42 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             ApplyPose(tuning.Death);
         }
 
-        private void ApplyPose(ProceduralHumanoidLimbPose pose)
+        private void ApplyTakeoff(float progress, ProceduralHumanoidTakeoffPose crouch, ProceduralHumanoidTakeoffPose push)
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees, pose.UpperArmAxis);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, pose.ThighDegrees, pose.ThighAxis);
-            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, pose.CalfDegrees, pose.CalfAxis);
+            var maximum = Mathf.Lerp(crouch.MaxAdditiveAngleDegrees, push.MaxAdditiveAngleDegrees, progress);
+            var usePushAxis = progress >= 0.5f;
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(crouch.UpperArmDegrees, push.UpperArmDegrees, progress), usePushAxis ? push.UpperArmAxis : crouch.UpperArmAxis, maximum);
+            AddRotation(leftThigh, leftThighBaseline, Axis(usePushAxis ? push.LeftThighAxis : crouch.LeftThighAxis), Mathf.Lerp(crouch.LeftThighDegrees, push.LeftThighDegrees, progress), maximum);
+            AddRotation(rightThigh, rightThighBaseline, Axis(usePushAxis ? push.RightThighAxis : crouch.RightThighAxis), Mathf.Lerp(crouch.RightThighDegrees, push.RightThighDegrees, progress), maximum);
+            AddRotation(leftCalf, leftCalfBaseline, Axis(usePushAxis ? push.LeftCalfAxis : crouch.LeftCalfAxis), Mathf.Lerp(crouch.LeftCalfDegrees, push.LeftCalfDegrees, progress), maximum);
+            AddRotation(rightCalf, rightCalfBaseline, Axis(usePushAxis ? push.RightCalfAxis : crouch.RightCalfAxis), Mathf.Lerp(crouch.RightCalfDegrees, push.RightCalfDegrees, progress), maximum);
+        }
+
+        private void ApplyTakeoffToPose(float progress, ProceduralHumanoidTakeoffPose start, ProceduralHumanoidLimbPose end)
+        {
+            var maximum = Mathf.Lerp(start.MaxAdditiveAngleDegrees, end.MaxAdditiveAngleDegrees, progress);
+            var useEndAxis = progress >= 0.5f;
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(start.UpperArmDegrees, end.UpperArmDegrees, progress), useEndAxis ? end.UpperArmAxis : start.UpperArmAxis, maximum);
+            AddRotation(leftThigh, leftThighBaseline, Axis(useEndAxis ? end.ThighAxis : start.LeftThighAxis), Mathf.Lerp(start.LeftThighDegrees, end.ThighDegrees, progress), maximum);
+            AddRotation(rightThigh, rightThighBaseline, Axis(useEndAxis ? end.ThighAxis : start.RightThighAxis), Mathf.Lerp(start.RightThighDegrees, end.ThighDegrees, progress), maximum);
+            AddRotation(leftCalf, leftCalfBaseline, Axis(useEndAxis ? end.CalfAxis : start.LeftCalfAxis), Mathf.Lerp(start.LeftCalfDegrees, end.CalfDegrees, progress), maximum);
+            AddRotation(rightCalf, rightCalfBaseline, Axis(useEndAxis ? end.CalfAxis : start.RightCalfAxis), Mathf.Lerp(start.RightCalfDegrees, end.CalfDegrees, progress), maximum);
+        }
+
+        private void ApplyPoseTransition(ProceduralHumanoidLimbPose start, ProceduralHumanoidLimbPose end, float progress)
+        {
+            var maximum = Mathf.Lerp(start.MaxAdditiveAngleDegrees, end.MaxAdditiveAngleDegrees, progress);
+            var useEndAxis = progress >= 0.5f;
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(start.UpperArmDegrees, end.UpperArmDegrees, progress), useEndAxis ? end.UpperArmAxis : start.UpperArmAxis, maximum);
+            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, Mathf.Lerp(start.ThighDegrees, end.ThighDegrees, progress), useEndAxis ? end.ThighAxis : start.ThighAxis, maximum);
+            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, Mathf.Lerp(start.CalfDegrees, end.CalfDegrees, progress), useEndAxis ? end.CalfAxis : start.CalfAxis, maximum);
+        }
+
+        private void ApplyPose(ProceduralHumanoidLimbPose pose, float weight = 1f)
+        {
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees * weight, pose.UpperArmAxis, pose.MaxAdditiveAngleDegrees);
+            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, pose.ThighDegrees * weight, pose.ThighAxis, pose.MaxAdditiveAngleDegrees);
+            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, pose.CalfDegrees * weight, pose.CalfAxis, pose.MaxAdditiveAngleDegrees);
         }
 
         private static void ApplyPair(
@@ -279,11 +334,12 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             Transform right,
             Quaternion rightBaseline,
             float degrees,
-            ProceduralHumanoidLocalAxis axis)
+            ProceduralHumanoidLocalAxis axis,
+            float maximum)
         {
             var vector = Axis(axis);
-            AddRotation(left, leftBaseline, vector, degrees);
-            AddRotation(right, rightBaseline, vector, degrees);
+            AddRotation(left, leftBaseline, vector, degrees, maximum);
+            AddRotation(right, rightBaseline, vector, degrees, maximum);
         }
 
         private static Vector3 Axis(ProceduralHumanoidLocalAxis axis)
@@ -299,10 +355,10 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             }
         }
 
-        private static void AddRotation(Transform target, Quaternion baseline, Vector3 axis, float degrees)
+        private static void AddRotation(Transform target, Quaternion baseline, Vector3 axis, float degrees, float maximum)
         {
             target.localRotation = baseline * Quaternion.AngleAxis(
-                Mathf.Clamp(degrees, -MaxAdditiveAngleDegrees, MaxAdditiveAngleDegrees), axis);
+                Mathf.Clamp(degrees, -maximum, maximum), axis);
         }
 
         private static bool IsFinite(float value)

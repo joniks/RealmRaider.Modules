@@ -25,10 +25,16 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             ProceduralHumanoidLocalAxis upperArmAxis,
             ProceduralHumanoidLocalAxis thighAxis,
             ProceduralHumanoidLocalAxis calfAxis)
+            : this(upperArmDegrees, thighDegrees, calfDegrees, upperArmAxis, thighAxis, calfAxis, ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees)
         {
-            UpperArmDegrees = ClampDegrees(upperArmDegrees);
-            ThighDegrees = ClampDegrees(thighDegrees);
-            CalfDegrees = ClampDegrees(calfDegrees);
+        }
+
+        public ProceduralHumanoidLimbPose(float upperArmDegrees, float thighDegrees, float calfDegrees, ProceduralHumanoidLocalAxis upperArmAxis, ProceduralHumanoidLocalAxis thighAxis, ProceduralHumanoidLocalAxis calfAxis, float maximum)
+        {
+            MaxAdditiveAngleDegrees = ClampMaximum(maximum);
+            UpperArmDegrees = ClampDegrees(upperArmDegrees, MaxAdditiveAngleDegrees);
+            ThighDegrees = ClampDegrees(thighDegrees, MaxAdditiveAngleDegrees);
+            CalfDegrees = ClampDegrees(calfDegrees, MaxAdditiveAngleDegrees);
             UpperArmAxis = ClampAxis(upperArmAxis);
             ThighAxis = ClampAxis(thighAxis);
             CalfAxis = ClampAxis(calfAxis);
@@ -40,16 +46,25 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         public ProceduralHumanoidLocalAxis UpperArmAxis { get; }
         public ProceduralHumanoidLocalAxis ThighAxis { get; }
         public ProceduralHumanoidLocalAxis CalfAxis { get; }
+        public float MaxAdditiveAngleDegrees { get; }
 
         internal static float ClampDegrees(float value)
         {
+            return ClampDegrees(value, ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees);
+        }
+
+        internal static float ClampDegrees(float value, float maximum)
+        {
             if (float.IsNaN(value) || float.IsInfinity(value))
                 return 0f;
-            return value < -ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees
-                ? -ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees
-                : value > ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees
-                    ? ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees
+            return value < -maximum ? -maximum : value > maximum ? maximum
                     : value;
+        }
+
+        internal static float ClampMaximum(float value)
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value)) return ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees;
+            return value < ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees ? ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees : value > ProceduralHumanoidPoseDriver.MaxPerPoseAngleDegrees ? ProceduralHumanoidPoseDriver.MaxPerPoseAngleDegrees : value;
         }
 
         internal static ProceduralHumanoidLocalAxis ClampAxis(ProceduralHumanoidLocalAxis value)
@@ -74,12 +89,18 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             ProceduralHumanoidLocalAxis rightThighAxis,
             ProceduralHumanoidLocalAxis leftCalfAxis,
             ProceduralHumanoidLocalAxis rightCalfAxis)
+            : this(upperArmDegrees, leftThighDegrees, rightThighDegrees, leftCalfDegrees, rightCalfDegrees, upperArmAxis, leftThighAxis, rightThighAxis, leftCalfAxis, rightCalfAxis, ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees)
         {
-            UpperArmDegrees = ProceduralHumanoidLimbPose.ClampDegrees(upperArmDegrees);
-            LeftThighDegrees = ProceduralHumanoidLimbPose.ClampDegrees(leftThighDegrees);
-            RightThighDegrees = ProceduralHumanoidLimbPose.ClampDegrees(rightThighDegrees);
-            LeftCalfDegrees = ProceduralHumanoidLimbPose.ClampDegrees(leftCalfDegrees);
-            RightCalfDegrees = ProceduralHumanoidLimbPose.ClampDegrees(rightCalfDegrees);
+        }
+
+        public ProceduralHumanoidTakeoffPose(float upperArmDegrees, float leftThighDegrees, float rightThighDegrees, float leftCalfDegrees, float rightCalfDegrees, ProceduralHumanoidLocalAxis upperArmAxis, ProceduralHumanoidLocalAxis leftThighAxis, ProceduralHumanoidLocalAxis rightThighAxis, ProceduralHumanoidLocalAxis leftCalfAxis, ProceduralHumanoidLocalAxis rightCalfAxis, float maximum)
+        {
+            MaxAdditiveAngleDegrees = ProceduralHumanoidLimbPose.ClampMaximum(maximum);
+            UpperArmDegrees = ProceduralHumanoidLimbPose.ClampDegrees(upperArmDegrees, MaxAdditiveAngleDegrees);
+            LeftThighDegrees = ProceduralHumanoidLimbPose.ClampDegrees(leftThighDegrees, MaxAdditiveAngleDegrees);
+            RightThighDegrees = ProceduralHumanoidLimbPose.ClampDegrees(rightThighDegrees, MaxAdditiveAngleDegrees);
+            LeftCalfDegrees = ProceduralHumanoidLimbPose.ClampDegrees(leftCalfDegrees, MaxAdditiveAngleDegrees);
+            RightCalfDegrees = ProceduralHumanoidLimbPose.ClampDegrees(rightCalfDegrees, MaxAdditiveAngleDegrees);
             UpperArmAxis = ProceduralHumanoidLimbPose.ClampAxis(upperArmAxis);
             LeftThighAxis = ProceduralHumanoidLimbPose.ClampAxis(leftThighAxis);
             RightThighAxis = ProceduralHumanoidLimbPose.ClampAxis(rightThighAxis);
@@ -97,6 +118,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         public ProceduralHumanoidLocalAxis RightThighAxis { get; }
         public ProceduralHumanoidLocalAxis LeftCalfAxis { get; }
         public ProceduralHumanoidLocalAxis RightCalfAxis { get; }
+        public float MaxAdditiveAngleDegrees { get; }
 
         internal static ProceduralHumanoidTakeoffPose FromSymmetric(ProceduralHumanoidLimbPose pose)
         {
@@ -113,6 +135,8 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
     public sealed class ProceduralHumanoidMotionTuning
     {
         public const float MaxSwingCadenceRadiansPerSecond = 16f;
+        public const float BloodKnightLocomotionMaxAdditiveAngleDegrees = 60f;
+        public const float BloodKnightCrouchMaxAdditiveAngleDegrees = 90f;
 
         public static readonly ProceduralHumanoidMotionTuning CompatibilityDefault =
             new ProceduralHumanoidMotionTuning(
@@ -131,11 +155,11 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             new ProceduralHumanoidMotionTuning(
                 7.5f, 3.5f,
                 new ProceduralHumanoidLimbPose(
-                    28f, 25f, 13f,
-                    ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward),
+                    56f, 50f, 26f,
+                    ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, BloodKnightLocomotionMaxAdditiveAngleDegrees),
                 new ProceduralHumanoidLimbPose(-18f, -16f, 12f),
-                new ProceduralHumanoidLimbPose(22f, 12f, 0f),
-                new ProceduralHumanoidLimbPose(-10f, -22f, 24f),
+                new ProceduralHumanoidLimbPose(22f, 12f, 0f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward),
+                new ProceduralHumanoidLimbPose(-10f, -22f, 24f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward),
                 -30f, 12f,
                 new ProceduralHumanoidLimbPose(-28f, 12f, 0f),
                 new ProceduralHumanoidLimbPose(14f, -9f, 0f),
@@ -144,7 +168,9 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
                     -18f, -22f, 12f, 20f, -10f,
                     ProceduralHumanoidLocalAxis.Forward,
                     ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward,
-                    ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward));
+                    ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward),
+                new ProceduralHumanoidTakeoffPose(-30f, -88f, -88f, 80f, 80f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, BloodKnightCrouchMaxAdditiveAngleDegrees),
+                4f, 3f);
 
         public ProceduralHumanoidMotionTuning(
             float swingCadenceRadiansPerSecond,
@@ -178,12 +204,18 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             ProceduralHumanoidLimbPose hit,
             ProceduralHumanoidLimbPose death,
             ProceduralHumanoidTakeoffPose asymmetricJumpTakeoff)
+            : this(swingCadenceRadiansPerSecond, idleArmDegrees, locomotion, jumpTakeoff, jumpFall, jumpLand, primaryWeaponArmDegrees, primarySupportArmDegrees, abilityAttack, hit, death, asymmetricJumpTakeoff, ProceduralHumanoidTakeoffPose.FromSymmetric(jumpTakeoff), 1f, 1f)
+        {
+        }
+
+        public ProceduralHumanoidMotionTuning(float swingCadenceRadiansPerSecond, float idleArmDegrees, ProceduralHumanoidLimbPose locomotion, ProceduralHumanoidLimbPose jumpTakeoff, ProceduralHumanoidLimbPose jumpFall, ProceduralHumanoidLimbPose jumpLand, float primaryWeaponArmDegrees, float primarySupportArmDegrees, ProceduralHumanoidLimbPose abilityAttack, ProceduralHumanoidLimbPose hit, ProceduralHumanoidLimbPose death, ProceduralHumanoidTakeoffPose asymmetricJumpTakeoff, ProceduralHumanoidTakeoffPose deepCrouch, float jumpPresentationDurationMultiplier, float takeoffStraightenDurationMultiplier)
         {
             SwingCadenceRadiansPerSecond = ClampCadence(swingCadenceRadiansPerSecond);
             IdleArmDegrees = ProceduralHumanoidLimbPose.ClampDegrees(idleArmDegrees);
             Locomotion = locomotion;
             JumpTakeoff = jumpTakeoff;
             AsymmetricJumpTakeoff = asymmetricJumpTakeoff;
+            DeepCrouch = deepCrouch;
             JumpFall = jumpFall;
             JumpLand = jumpLand;
             PrimaryWeaponArmDegrees = ProceduralHumanoidLimbPose.ClampDegrees(primaryWeaponArmDegrees);
@@ -191,6 +223,8 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             AbilityAttack = abilityAttack;
             Hit = hit;
             Death = death;
+            JumpPresentationDurationMultiplier = ClampDurationMultiplier(jumpPresentationDurationMultiplier);
+            TakeoffStraightenDurationMultiplier = ClampDurationMultiplier(takeoffStraightenDurationMultiplier);
         }
 
         public float SwingCadenceRadiansPerSecond { get; }
@@ -198,6 +232,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         public ProceduralHumanoidLimbPose Locomotion { get; }
         public ProceduralHumanoidLimbPose JumpTakeoff { get; }
         public ProceduralHumanoidTakeoffPose AsymmetricJumpTakeoff { get; }
+        public ProceduralHumanoidTakeoffPose DeepCrouch { get; }
         public ProceduralHumanoidLimbPose JumpFall { get; }
         public ProceduralHumanoidLimbPose JumpLand { get; }
         public float PrimaryWeaponArmDegrees { get; }
@@ -205,12 +240,22 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         public ProceduralHumanoidLimbPose AbilityAttack { get; }
         public ProceduralHumanoidLimbPose Hit { get; }
         public ProceduralHumanoidLimbPose Death { get; }
+        /// <summary>Core-owned duration multiplier for the entire factual jump presentation timeline.</summary>
+        public float JumpPresentationDurationMultiplier { get; }
+        /// <summary>Core-owned duration multiplier for the normalized crouch-to-push segment.</summary>
+        public float TakeoffStraightenDurationMultiplier { get; }
 
         private static float ClampCadence(float value)
         {
             if (float.IsNaN(value) || float.IsInfinity(value) || value <= 0f)
                 return 0f;
             return value > MaxSwingCadenceRadiansPerSecond ? MaxSwingCadenceRadiansPerSecond : value;
+        }
+
+        private static float ClampDurationMultiplier(float value)
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value) || value < 1f) return 1f;
+            return value > 4f ? 4f : value;
         }
     }
 }
