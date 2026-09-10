@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "candidateId": "realmraiders.preview.sylvan-clearing-floor.mws10.v1",
+  "createdOn": "2026-09-10",
+  "status": "preview-import-candidate-not-approved-for-runtime",
+  "thirdPartySources": false,
+  "source": {
+    "path": "Assets/Game/Resources/Art/WorldSurfaces/MWS02-SylvanGroundMaterialCandidate/sylvan-ground-albedo-rgb-candidate.png",
+    "sha256": "629f6c3f79019adc261fa5d80a636ec7dec1832ede2dc161012576b14f03ca50",
+    "dimensions": [1024, 1024],
+    "colorFormat": "RGB",
+    "role": "accepted-original-generated-sylvan-ground-direction"
+  },
+  "albedoCreation": {
+    "tool": "OpenAI built-in image generation",
+    "inputRole": "sole visual source/reference",
+    "operation": "derived distinct Sylvan clearing-floor direction with broad moss, soil and leaf forms; resized to 1024 square",
+    "promptSummary": "Broad mobile-readable Sylvan moss, soil and leaf clearing floor, distinct from stone path and living-root boundary, with calm outer edges and no central emblem or directional lighting."
+  },
+  "normalCreation": {
+    "toolPath": "Tools/surface_maps/derive_normal_map.py",
+    "toolVersion": "1.0.0",
+    "algorithm": "wrapped-edge luminance central differences encoded as normalized RGB tangent-space normals",
+    "strength": 0.35,
+    "command": "python3 Tools/surface_maps/derive_normal_map.py ArtPreviews/MWS10-SylvanClearingFloor/sylvan-clearing-floor-albedo-rgb-candidate.png ArtPreviews/MWS10-SylvanClearingFloor/sylvan-clearing-floor-mobile-normal-rgb-candidate.png --strength 0.35 --repeat-grid-output ArtPreviews/MWS10-SylvanClearingFloor/sylvan-clearing-floor-mobile-normal-2x2-repeat-evidence.png"
+  },
+  "outputs": [
+    {
+      "file": "sylvan-clearing-floor-albedo-rgb-candidate.png",
+      "role": "albedo-candidate",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "sha256": "e7731ffb989ecb457b787ea19bd13314d61b684b0d4fc75b8adb507501ce6ed6"
+    },
+    {
+      "file": "sylvan-clearing-floor-albedo-2x2-repeat-evidence.png",
+      "role": "exact-2x2-albedo-repeat-evidence",
+      "dimensions": [2048, 2048],
+      "colorFormat": "RGB",
+      "sha256": "55f217f2b167dfa219b8e54116456bf6d64e62ed3426fb522ed276540381a689"
+    },
+    {
+      "file": "sylvan-clearing-floor-mobile-normal-rgb-candidate.png",
+      "role": "tangent-space-normal-map-candidate",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "sha256": "aca8df9a0b0ed56bea8c839284cb4814d99ffb344307b3e3476a12262f6dcef5"
+    },
+    {
+      "file": "sylvan-clearing-floor-mobile-normal-2x2-repeat-evidence.png",
+      "role": "exact-2x2-normal-repeat-evidence",
+      "dimensions": [2048, 2048],
+      "colorFormat": "RGB",
+      "sha256": "b2b4f99709738a62d76ff393c8df6fbecf0acb523dbaaa9f530e16832e8762d2"
+    }
+  ],
+  "recommendedInitialUnityTileScale": "3.5 world units per 1024 px tile",
+  "repeatEvidenceInspected": true,
+  "tileabilityVerified": false,
+  "reviewRequired": [
+    "Unity albedo and normal import validation",
+    "material-scale and mobile-compression review",
+    "on-device lighting and visible-periodicity review"
+  ],
+  "nonGoals": [
+    "runtime material integration",
+    "albedo source replacement",
+    "height, displacement, emission or mask maps",
+    "collider or gameplay authority"
+  ]
+}
