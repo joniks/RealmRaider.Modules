@@ -168,6 +168,9 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         public const float MaxSwingCadenceRadiansPerSecond = 16f;
         public const float BloodKnightLocomotionMaxAdditiveAngleDegrees = 60f;
         public const float BloodKnightCrouchMaxAdditiveAngleDegrees = 90f;
+        public const float BloodKnightUpperTorsoWalkDegrees = 2f;
+        public const float BloodKnightUpperTorsoAttackDegrees = 8f;
+        public const float BloodKnightUpperTorsoHitDegrees = 5f;
         public static readonly ProceduralHumanoidLimbPose BloodKnightAttackWindup = new ProceduralHumanoidLimbPose(-18f, -8f, 4f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward);
         public static readonly ProceduralHumanoidLimbPose BloodKnightAttackImpact = new ProceduralHumanoidLimbPose(30f, 14f, -8f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward);
         public static readonly ProceduralHumanoidLimbPose BloodKnightAttackRecovery = new ProceduralHumanoidLimbPose(10f, 5f, -3f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward);

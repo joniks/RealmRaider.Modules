@@ -19,12 +19,14 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         private Transform rightThigh;
         private Transform leftCalf;
         private Transform rightCalf;
+        private Transform upperTorso;
         private Quaternion leftUpperArmBaseline;
         private Quaternion rightUpperArmBaseline;
         private Quaternion leftThighBaseline;
         private Quaternion rightThighBaseline;
         private Quaternion leftCalfBaseline;
         private Quaternion rightCalfBaseline;
+        private Quaternion upperTorsoBaseline;
         private Vector3 leftUpperArmPositionBaseline;
         private Vector3 rightUpperArmPositionBaseline;
         private Vector3 leftThighPositionBaseline;
@@ -43,6 +45,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         private Vector3 rightThighSagittalAxis;
         private Vector3 leftCalfSagittalAxis;
         private Vector3 rightCalfSagittalAxis;
+        private Vector3 upperTorsoSagittalAxis;
         private bool usesCharacterSagittalPlane;
         private readonly ProceduralHumanoidMotionTuning tuning;
 
@@ -99,11 +102,22 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             Transform foundRightThigh = null;
             Transform foundLeftCalf = null;
             Transform foundRightCalf = null;
+            Transform foundUpperTorso = null;
+            var duplicateUpperTorso = false;
+            var wantsUpperTorso = axisPolicy == ProceduralHumanoidAxisPolicy.CharacterSagittalPlane &&
+                                  IsBloodKnightTuning() && names.HasUsableOptionalUpperTorsoName();
             for (var index = 0; index < descendants.Length; index++)
             {
                 var candidate = descendants[index];
                 if (candidate == suppliedVisualRoot)
                     continue;
+                if (wantsUpperTorso && string.Equals(candidate.name, names.OptionalUpperTorso, System.StringComparison.Ordinal))
+                {
+                    if (foundUpperTorso == null)
+                        foundUpperTorso = candidate;
+                    else
+                        duplicateUpperTorso = true;
+                }
                 if (!TryAssign(candidate, names.LeftUpperArm, ref foundLeftUpperArm) ||
                     !TryAssign(candidate, names.RightUpperArm, ref foundRightUpperArm) ||
                     !TryAssign(candidate, names.LeftThigh, ref foundLeftThigh) ||
@@ -139,6 +153,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
                 return false;
             }
             usesCharacterSagittalPlane = axisPolicy == ProceduralHumanoidAxisPolicy.CharacterSagittalPlane;
+            TryBindOptionalUpperTorso(foundUpperTorso, duplicateUpperTorso, characterOrientationReference);
             return true;
         }
 
@@ -207,13 +222,34 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
                     if (useLegacyStaticJumpPose) ApplyPose(tuning.JumpLand, 1f, UsesBloodKnightSagittalPlane); else ApplyJumpLand(jumpProgress);
                     break;
                 case MotionClipKey.AttackPrimary:
-                    if (useLegacyCombatPose) ApplyPrimaryAttack(); else { ApplyLiveBase(speed, swing); ApplyCombatAttack(combat); }
+                    if (useLegacyCombatPose)
+                        ApplyPrimaryAttack();
+                    else
+                    {
+                        ApplyLiveBase(speed, swing);
+                        ApplyCombatAttack(combat);
+                        ApplyUpperTorsoAttack(speed, swing, combat);
+                    }
                     break;
                 case MotionClipKey.AttackAbility:
-                    if (useLegacyCombatPose) ApplyAbilityAttack(); else { ApplyLiveBase(speed, swing); ApplyCombatAttack(combat); }
+                    if (useLegacyCombatPose)
+                        ApplyAbilityAttack();
+                    else
+                    {
+                        ApplyLiveBase(speed, swing);
+                        ApplyCombatAttack(combat);
+                        ApplyUpperTorsoAttack(speed, swing, combat);
+                    }
                     break;
                 case MotionClipKey.Hit:
-                    if (useLegacyCombatPose) ApplyHit(); else { ApplyLiveBase(speed, swing); ApplyCombatHit(combat); }
+                    if (useLegacyCombatPose)
+                        ApplyHit();
+                    else
+                    {
+                        ApplyLiveBase(speed, swing);
+                        ApplyCombatHit(combat);
+                        ApplyUpperTorsoHit(speed, swing, combat);
+                    }
                     break;
                 case MotionClipKey.Death:
                     ApplyDeathSettle();
@@ -233,13 +269,37 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             rightThigh = null;
             leftCalf = null;
             rightCalf = null;
+            upperTorso = null;
             leftUpperArmSagittalAxis = Vector3.zero;
             rightUpperArmSagittalAxis = Vector3.zero;
             leftThighSagittalAxis = Vector3.zero;
             rightThighSagittalAxis = Vector3.zero;
             leftCalfSagittalAxis = Vector3.zero;
             rightCalfSagittalAxis = Vector3.zero;
+            upperTorsoSagittalAxis = Vector3.zero;
+            upperTorsoBaseline = Quaternion.identity;
             usesCharacterSagittalPlane = false;
+        }
+
+        private void TryBindOptionalUpperTorso(
+            Transform candidate,
+            bool isDuplicate,
+            Transform characterOrientationReference)
+        {
+            if (!usesCharacterSagittalPlane || !IsBloodKnightTuning() || candidate == null ||
+                isDuplicate || !HasSupportedScale(candidate))
+                return;
+
+            var referenceRight = characterOrientationReference.rotation * Vector3.right;
+            if (!IsFinite(referenceRight) || referenceRight.sqrMagnitude < 0.999f)
+                return;
+            referenceRight.Normalize();
+            if (!TryCalculateLocalAxis(candidate, referenceRight, out var localAxis))
+                return;
+
+            upperTorso = candidate;
+            upperTorsoBaseline = candidate.localRotation;
+            upperTorsoSagittalAxis = localAxis;
         }
 
         private bool TryCacheSagittalAxes(Transform characterOrientationReference)
@@ -320,6 +380,8 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             rightThigh.localRotation = rightThighBaseline;
             leftCalf.localRotation = leftCalfBaseline;
             rightCalf.localRotation = rightCalfBaseline;
+            if (upperTorso != null)
+                upperTorso.localRotation = upperTorsoBaseline;
             leftUpperArm.localPosition = leftUpperArmPositionBaseline;
             rightUpperArm.localPosition = rightUpperArmPositionBaseline;
             leftThigh.localPosition = leftThighPositionBaseline;
@@ -352,6 +414,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             AddRotation(rightThigh, rightThighBaseline, EffectiveAxis(rightThigh, tuning.Locomotion.ThighAxis, useSemanticAxis), thigh, tuning.Locomotion.MaxAdditiveAngleDegrees);
             AddRotation(leftCalf, leftCalfBaseline, EffectiveAxis(leftCalf, tuning.Locomotion.CalfAxis, useSemanticAxis), calf, tuning.Locomotion.MaxAdditiveAngleDegrees);
             AddRotation(rightCalf, rightCalfBaseline, EffectiveAxis(rightCalf, tuning.Locomotion.CalfAxis, useSemanticAxis), -calf, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            ApplyUpperTorso(WalkUpperTorsoDegrees(speed, swing), ProceduralHumanoidMotionTuning.BloodKnightUpperTorsoWalkDegrees);
         }
 
         private void ApplyLiveBase(float speed, float swing)
@@ -424,6 +487,58 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
                 Signed(combat.SignedRecoilDirection),
                 envelope * Finite01(combat.HitWeight),
                 UsesBloodKnightSagittalPlane);
+        }
+
+        private void ApplyUpperTorsoAttack(
+            float speed,
+            float swing,
+            ProceduralHumanoidCombatPoseSample combat)
+        {
+            if (upperTorso == null)
+                return;
+
+            var progress = Finite01(combat.AttackProgress);
+            var stage = ClampAttackStage(combat.AttackStage);
+            float attackDegrees;
+            if (stage == ProceduralHumanoidAttackStage.Windup)
+                attackDegrees = Mathf.Lerp(0f, -4f, progress);
+            else if (stage == ProceduralHumanoidAttackStage.Impact)
+                attackDegrees = Mathf.Lerp(-4f, ProceduralHumanoidMotionTuning.BloodKnightUpperTorsoAttackDegrees, progress);
+            else if (progress <= 0.5f)
+                attackDegrees = Mathf.Lerp(ProceduralHumanoidMotionTuning.BloodKnightUpperTorsoAttackDegrees, 3f, progress * 2f);
+            else
+                attackDegrees = Mathf.Lerp(3f, 0f, progress * 2f - 1f);
+
+            var combined = WalkUpperTorsoDegrees(speed, swing) + attackDegrees * Finite01(combat.AttackBlend);
+            ApplyUpperTorso(combined, ProceduralHumanoidMotionTuning.BloodKnightUpperTorsoAttackDegrees);
+        }
+
+        private void ApplyUpperTorsoHit(
+            float speed,
+            float swing,
+            ProceduralHumanoidCombatPoseSample combat)
+        {
+            if (upperTorso == null)
+                return;
+
+            var progress = Finite01(combat.HitProgress);
+            var envelope = progress <= 0.5f ? progress * 2f : 2f - progress * 2f;
+            var hitDegrees = -ProceduralHumanoidMotionTuning.BloodKnightUpperTorsoHitDegrees * envelope * Finite01(combat.HitWeight);
+            ApplyUpperTorso(
+                WalkUpperTorsoDegrees(speed, swing) + hitDegrees,
+                ProceduralHumanoidMotionTuning.BloodKnightUpperTorsoHitDegrees);
+        }
+
+        private static float WalkUpperTorsoDegrees(float speed, float swing)
+        {
+            return -ProceduralHumanoidMotionTuning.BloodKnightUpperTorsoWalkDegrees * speed * swing;
+        }
+
+        private void ApplyUpperTorso(float degrees, float maximum)
+        {
+            if (upperTorso == null)
+                return;
+            AddRotation(upperTorso, upperTorsoBaseline, upperTorsoSagittalAxis, degrees, maximum);
         }
 
         private void ApplyDirectionalPose(ProceduralHumanoidLimbPose pose, float direction, float weight, bool useSemanticAxis)

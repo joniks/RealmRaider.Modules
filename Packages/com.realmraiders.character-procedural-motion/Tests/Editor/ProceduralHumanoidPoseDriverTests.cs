@@ -700,6 +700,201 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
         }
 
         [Test]
+        public void OptionalUpperTorso_BindsExactlyAndEveryOptionalFailureKeepsSixBoneMotion()
+        {
+            var presentation = CreateSemanticRig(out var bodyRoot, out var bones, out _, out var upperTorso);
+            try
+            {
+                var limbBaseline = Snapshot(bones);
+                var torsoBaseline = BonePose.Of(upperTorso);
+                var walkClock = Mathf.PI * 0.5f / ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable.SwingCadenceRadiansPerSecond;
+                var driver = new ProceduralHumanoidPoseDriver(ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable);
+
+                Assert.That(driver.Bind(bodyRoot, presentation.transform, Bip01MapWithUpperTorso(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                driver.Sample(Input(isLocomoting: true), 1f, walkClock, 0f);
+                Assert.That(Quaternion.Angle(upperTorso.localRotation, torsoBaseline.Rotation), Is.GreaterThan(0.1f));
+                driver.Clear();
+                Assert.That(BonePose.Of(upperTorso), Is.EqualTo(torsoBaseline));
+
+                Assert.That(driver.Bind(bodyRoot, presentation.transform, Bip01MapWithUpperTorso("Missing Spine"), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                driver.Sample(Input(isLocomoting: true), 1f, walkClock, 0f);
+                Assert.That(BonePose.Of(upperTorso), Is.EqualTo(torsoBaseline));
+                Assert.That(Snapshot(bones), Is.Not.EqualTo(limbBaseline), "Missing optional torso must preserve the accepted six-bone motion.");
+                driver.Clear();
+
+                var duplicate = CreateChild(bodyRoot, "Bip01 Spine1", Vector3.zero, Quaternion.Euler(11f, 13f, 17f));
+                var duplicateBaseline = BonePose.Of(duplicate);
+                Assert.That(driver.Bind(bodyRoot, presentation.transform, Bip01MapWithUpperTorso(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                driver.Sample(Input(isLocomoting: true), 1f, walkClock, 0f);
+                Assert.That(BonePose.Of(upperTorso), Is.EqualTo(torsoBaseline));
+                Assert.That(BonePose.Of(duplicate), Is.EqualTo(duplicateBaseline));
+                Assert.That(Snapshot(bones), Is.Not.EqualTo(limbBaseline));
+                driver.Clear();
+                UnityEngine.Object.DestroyImmediate(duplicate.gameObject);
+
+                Assert.That(driver.Bind(bodyRoot, presentation.transform, Bip01MapWithUpperTorso(RequiredNames[0]), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                driver.Sample(Input(isLocomoting: true), 1f, walkClock, 0f);
+                Assert.That(BonePose.Of(upperTorso), Is.EqualTo(torsoBaseline), "An optional name colliding with a required limb must disable only the torso extension.");
+                driver.Clear();
+
+                upperTorso.localScale = new Vector3(-1f, 1f, 1f);
+                var reflectedTorso = BonePose.Of(upperTorso);
+                Assert.That(driver.Bind(bodyRoot, presentation.transform, Bip01MapWithUpperTorso(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                driver.Sample(Input(isLocomoting: true), 1f, walkClock, 0f);
+                Assert.That(BonePose.Of(upperTorso), Is.EqualTo(reflectedTorso));
+                Assert.That(Snapshot(bones), Is.Not.EqualTo(limbBaseline));
+                driver.Clear();
+                upperTorso.localScale = torsoBaseline.Scale;
+
+                upperTorso.localScale = new Vector3(1f, 0f, 1f);
+                var degenerateTorso = BonePose.Of(upperTorso);
+                Assert.That(driver.Bind(bodyRoot, presentation.transform, Bip01MapWithUpperTorso(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                driver.Sample(Input(isLocomoting: true), 1f, walkClock, 0f);
+                Assert.That(BonePose.Of(upperTorso), Is.EqualTo(degenerateTorso));
+                Assert.That(Snapshot(bones), Is.Not.EqualTo(limbBaseline));
+                driver.Clear();
+                upperTorso.localScale = torsoBaseline.Scale;
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(presentation);
+            }
+        }
+
+        [Test]
+        public void OptionalUpperTorso_UsesReferenceYawAndBoundedWalkAttackHitSigns()
+        {
+            var presentation = CreateSemanticRig(out var bodyRoot, out var bones, out _, out var upperTorso);
+            try
+            {
+                var presentationPose = BonePose.Of(presentation.transform);
+                var bodyPose = BonePose.Of(bodyRoot);
+                var limbBaseline = Snapshot(bones);
+                var torsoBaseline = BonePose.Of(upperTorso);
+                var torsoWorldBaseline = upperTorso.rotation;
+                var driver = new ProceduralHumanoidPoseDriver(ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable);
+                Assert.That(driver.Bind(bodyRoot, presentation.transform, Bip01MapWithUpperTorso(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                var torsoAxis = CachedUpperTorsoAxis(driver);
+                Assert.That(Vector3.Dot((torsoWorldBaseline * torsoAxis).normalized, presentation.transform.right.normalized), Is.GreaterThan(0.9999f));
+
+                var positiveClock = Mathf.PI * 0.5f / driver.Tuning.SwingCadenceRadiansPerSecond;
+                var negativeClock = Mathf.PI * 1.5f / driver.Tuning.SwingCadenceRadiansPerSecond;
+                driver.Sample(Input(isLocomoting: true), 1f, positiveClock, 0f);
+                AssertUpperTorsoRotation(upperTorso, torsoBaseline, torsoAxis, -2f, 2f, "Positive gait counterweight");
+                driver.Sample(Input(isLocomoting: true), 1f, negativeClock, 0f);
+                AssertUpperTorsoRotation(upperTorso, torsoBaseline, torsoAxis, 2f, 2f, "Negative gait counterweight");
+
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0f, 0f, 0f, 1f, Combat(ProceduralHumanoidAttackStage.Windup, 1f));
+                AssertUpperTorsoRotation(upperTorso, torsoBaseline, torsoAxis, -4f, 8f, "Windup");
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0f, 0f, 0f, 1f, Combat(ProceduralHumanoidAttackStage.Impact, 1f));
+                AssertUpperTorsoRotation(upperTorso, torsoBaseline, torsoAxis, 8f, 8f, "Impact");
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0f, 0f, 0f, 1f, Combat(ProceduralHumanoidAttackStage.Recovery, 1f));
+                Assert.That(BonePose.Of(upperTorso), Is.EqualTo(torsoBaseline));
+
+                driver.Sample(Input(reaction: MotionPresentationReaction.Hit), 0f, 0f, 0f, 1f, Combat(hitProgress: 0.5f, hitWeight: 1f));
+                AssertUpperTorsoRotation(upperTorso, torsoBaseline, torsoAxis, -5f, 5f, "Hit recoil");
+                Assert.That(BonePose.Of(presentation.transform), Is.EqualTo(presentationPose));
+                Assert.That(BonePose.Of(bodyRoot), Is.EqualTo(bodyPose));
+                AssertPoseWithinBounds(Snapshot(bones), limbBaseline, ProceduralHumanoidPoseDriver.MaxPerPoseAngleDegrees, "Torso extension limbs");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(presentation);
+            }
+        }
+
+        [Test]
+        public void OptionalUpperTorso_PriorityIdempotenceDenseSparseAndLifecycleAreExact()
+        {
+            var firstPresentation = CreateSemanticRig(out var firstBody, out _, out _, out var firstTorso);
+            var secondPresentation = CreateSemanticRig(out var secondBody, out _, out _, out var secondTorso);
+            try
+            {
+                var firstBaseline = BonePose.Of(firstTorso);
+                var secondBaseline = BonePose.Of(secondTorso);
+                var driver = new ProceduralHumanoidPoseDriver(ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable);
+                Assert.That(driver.Bind(firstBody, firstPresentation.transform, Bip01MapWithUpperTorso(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                var axis = CachedUpperTorsoAxis(driver);
+                var finalAttack = Combat(ProceduralHumanoidAttackStage.Impact, 0.65f, 1f);
+
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0.6f, 0.21f, 0f, 1f, finalAttack);
+                var sparse = BonePose.Of(firstTorso);
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0.6f, 0.21f, 0f, 1f, Combat(ProceduralHumanoidAttackStage.Windup, 0.25f, 1f));
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0.6f, 0.21f, 0f, 1f, Combat(ProceduralHumanoidAttackStage.Impact, 0.3f, 1f));
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0.6f, 0.21f, 0f, 1f, finalAttack);
+                Assert.That(BonePose.Of(firstTorso), Is.EqualTo(sparse), "Dense and sparse factual sampling must end at the same exact torso pose.");
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0.6f, 0.21f, 0f, 1f, finalAttack);
+                Assert.That(BonePose.Of(firstTorso), Is.EqualTo(sparse), "Repeated attack sampling must be idempotent.");
+
+                var hit = Combat(hitProgress: 0.5f, hitWeight: 1f);
+                driver.Sample(Input(reaction: MotionPresentationReaction.Hit, attack: MotionPresentationAttack.Primary), 0f, 0f, 0f, 1f, hit);
+                var hitPriority = BonePose.Of(firstTorso);
+                AssertUpperTorsoRotation(firstTorso, firstBaseline, axis, -5f, 5f, "Hit priority");
+                driver.Sample(Input(reaction: MotionPresentationReaction.Hit, attack: MotionPresentationAttack.Primary), 0f, 0f, 0f, 1f, hit);
+                Assert.That(BonePose.Of(firstTorso), Is.EqualTo(hitPriority));
+                driver.Sample(Input(reaction: MotionPresentationReaction.Death, attack: MotionPresentationAttack.Primary), 0f, 0f, 0f, 1f, hit);
+                Assert.That(BonePose.Of(firstTorso), Is.EqualTo(firstBaseline), "Death has no torso accent and remains above Hit and Attack.");
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Takeoff), 0f, 0f, 0f, 0f);
+                Assert.That(BonePose.Of(firstTorso), Is.EqualTo(firstBaseline), "Jump has no torso accent.");
+
+                driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0f, 0f, 0f, 1f, Combat(ProceduralHumanoidAttackStage.Impact, 1f));
+                Assert.That(driver.Bind(secondBody, secondPresentation.transform, Bip01MapWithUpperTorso(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                Assert.That(BonePose.Of(firstTorso), Is.EqualTo(firstBaseline));
+                driver.Sample(Input(isLocomoting: true), 1f, Mathf.PI * 0.5f / driver.Tuning.SwingCadenceRadiansPerSecond, 0f);
+                driver.Clear();
+                Assert.That(BonePose.Of(secondTorso), Is.EqualTo(secondBaseline));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(firstPresentation);
+                UnityEngine.Object.DestroyImmediate(secondPresentation);
+            }
+        }
+
+        [Test]
+        public void OptionalUpperTorso_NeverChangesAcceptedSixBoneOrLegacyOutputs()
+        {
+            var withoutPresentation = CreateSemanticRig(out var withoutBody, out var withoutBones, out _, out var withoutTorso);
+            var withPresentation = CreateSemanticRig(out var withBody, out var withBones, out _, out var withTorso);
+            var legacyRoot = CreateRig(out var legacyBones);
+            try
+            {
+                var withoutTorsoBaseline = BonePose.Of(withoutTorso);
+                var legacyBaseline = Snapshot(legacyBones);
+                var without = new ProceduralHumanoidPoseDriver(ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable);
+                var with = new ProceduralHumanoidPoseDriver(ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable);
+                var legacy = new ProceduralHumanoidPoseDriver(ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable);
+                Assert.That(without.Bind(withoutBody, withoutPresentation.transform, Bip01Map(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                Assert.That(with.Bind(withBody, withPresentation.transform, Bip01MapWithUpperTorso(), ProceduralHumanoidAxisPolicy.CharacterSagittalPlane), Is.True);
+                Assert.That(legacy.Bind(legacyRoot.transform, Bip01Map()), Is.True);
+
+                var walkClock = Mathf.PI * 0.5f / with.Tuning.SwingCadenceRadiansPerSecond;
+                without.Sample(Input(isLocomoting: true), 0.8f, walkClock, 0f);
+                with.Sample(Input(isLocomoting: true), 0.8f, walkClock, 0f);
+                Assert.That(Snapshot(withBones), Is.EqualTo(Snapshot(withoutBones)));
+                Assert.That(BonePose.Of(withoutTorso), Is.EqualTo(withoutTorsoBaseline));
+
+                var attack = Combat(ProceduralHumanoidAttackStage.Impact, 0.7f, 1f, 1f);
+                without.Sample(Input(attack: MotionPresentationAttack.Primary), 0.8f, walkClock, 0f, 1f, attack);
+                with.Sample(Input(attack: MotionPresentationAttack.Primary), 0.8f, walkClock, 0f, 1f, attack);
+                Assert.That(Snapshot(withBones), Is.EqualTo(Snapshot(withoutBones)));
+                Assert.That(Quaternion.Angle(withTorso.localRotation, withoutTorso.localRotation), Is.GreaterThan(0.1f));
+
+                legacy.Sample(Input(isLocomoting: true), 1f, 0.2f, 1f / 60f);
+                var firstLegacy = Snapshot(legacyBones);
+                legacy.Sample(Input(isLocomoting: true), 1f, 0.2f, 1f / 60f);
+                Assert.That(Snapshot(legacyBones), Is.EqualTo(firstLegacy));
+                Assert.That(AllBoundsRespected(legacyBones, legacyBaseline, 60f), Is.True);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(withoutPresentation);
+                UnityEngine.Object.DestroyImmediate(withPresentation);
+                UnityEngine.Object.DestroyImmediate(legacyRoot);
+            }
+        }
+
+        [Test]
         public void Contracts_AreImmutableAndDoNotReferenceGameplayAssembly()
         {
             Assert.That(typeof(HumanoidBoneNameMap).GetProperties(BindingFlags.Instance | BindingFlags.Public).All(property => !property.CanWrite), Is.True);
@@ -818,6 +1013,28 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
             return (Vector3)field.GetValue(driver);
         }
 
+        private static Vector3 CachedUpperTorsoAxis(ProceduralHumanoidPoseDriver driver)
+        {
+            var field = typeof(ProceduralHumanoidPoseDriver).GetField("upperTorsoSagittalAxis", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(field, Is.Not.Null);
+            return (Vector3)field.GetValue(driver);
+        }
+
+        private static void AssertUpperTorsoRotation(
+            Transform upperTorso,
+            BonePose baseline,
+            Vector3 axis,
+            float degrees,
+            float maximum,
+            string label)
+        {
+            Assert.That(Mathf.Abs(degrees), Is.LessThanOrEqualTo(maximum + 0.001f), $"{label} exceeded its torso bound.");
+            var expected = baseline.Rotation * Quaternion.AngleAxis(degrees, axis);
+            Assert.That(Quaternion.Angle(upperTorso.localRotation, expected), Is.LessThan(0.001f), $"{label} used the wrong bind-time axis or sign.");
+            Assert.That(upperTorso.localPosition, Is.EqualTo(baseline.Position), $"{label} moved the torso.");
+            Assert.That(upperTorso.localScale, Is.EqualTo(baseline.Scale), $"{label} scaled the torso.");
+        }
+
         private static void AssertSagittalLateralUnchanged(Vector3[] baseline, Vector3[] sampled)
         {
             for (var index = 0; index < baseline.Length; index++)
@@ -867,6 +1084,13 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
                 RequiredNames[3], RequiredNames[4], RequiredNames[5]);
         }
 
+        private static HumanoidBoneNameMap Bip01MapWithUpperTorso(string optionalUpperTorso = "Bip01 Spine1")
+        {
+            return new HumanoidBoneNameMap(
+                RequiredNames[0], RequiredNames[1], RequiredNames[2],
+                RequiredNames[3], RequiredNames[4], RequiredNames[5], optionalUpperTorso);
+        }
+
         private static GameObject CreateRig(out Transform[] bones)
         {
             var root = new GameObject("Visual Root");
@@ -885,6 +1109,11 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
 
         private static GameObject CreateSemanticRig(out Transform bodyRoot, out Transform[] bones, out Transform[] endpoints)
         {
+            return CreateSemanticRig(out bodyRoot, out bones, out endpoints, out _);
+        }
+
+        private static GameObject CreateSemanticRig(out Transform bodyRoot, out Transform[] bones, out Transform[] endpoints, out Transform upperTorso)
+        {
             var presentation = new GameObject("Presentation Pivot");
             presentation.transform.position = new Vector3(3f, 2f, -5f);
             presentation.transform.rotation = Quaternion.Euler(7f, 37f, -4f);
@@ -897,6 +1126,9 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
             var leftShoulder = CreateChild(bodyRoot, "Left Shoulder Parent", new Vector3(-0.35f, 1.35f, 0f), Quaternion.Euler(3f, -5f, 2f));
             var rightShoulder = CreateChild(bodyRoot, "Right Shoulder Parent", new Vector3(0.35f, 1.35f, 0f), Quaternion.Euler(-2f, 6f, -3f));
             var pelvis = CreateChild(bodyRoot, "Rotated Pelvis Parent", new Vector3(0f, 0.75f, 0f), Quaternion.Euler(2f, 4f, -1f));
+            var spine = CreateChild(pelvis, "Bip01 Spine", new Vector3(0f, 0.2f, 0f), Quaternion.Euler(3f, -6f, 2f));
+            upperTorso = CreateChild(spine, "Bip01 Spine1", new Vector3(0f, 0.45f, 0f), Quaternion.Euler(-4f, 7f, -3f));
+            CreateChild(upperTorso, "Bip01 Neck", new Vector3(0f, 0.35f, 0f), Quaternion.Euler(2f, -2f, 1f));
 
             bones = new Transform[RequiredNames.Length];
             bones[0] = CreateChild(leftShoulder, RequiredNames[0], Vector3.zero, Quaternion.Euler(4f, -7f, 5f));

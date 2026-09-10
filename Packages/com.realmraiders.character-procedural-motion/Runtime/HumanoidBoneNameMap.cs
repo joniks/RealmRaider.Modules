@@ -12,6 +12,18 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             string rightThigh,
             string leftCalf,
             string rightCalf)
+            : this(leftUpperArm, rightUpperArm, leftThigh, rightThigh, leftCalf, rightCalf, null)
+        {
+        }
+
+        public HumanoidBoneNameMap(
+            string leftUpperArm,
+            string rightUpperArm,
+            string leftThigh,
+            string rightThigh,
+            string leftCalf,
+            string rightCalf,
+            string optionalUpperTorso)
         {
             LeftUpperArm = leftUpperArm;
             RightUpperArm = rightUpperArm;
@@ -19,6 +31,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             RightThigh = rightThigh;
             LeftCalf = leftCalf;
             RightCalf = rightCalf;
+            OptionalUpperTorso = optionalUpperTorso;
         }
 
         public string LeftUpperArm { get; }
@@ -27,6 +40,19 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         public string RightThigh { get; }
         public string LeftCalf { get; }
         public string RightCalf { get; }
+        public string OptionalUpperTorso { get; }
+
+        internal bool HasUsableOptionalUpperTorsoName()
+        {
+            if (string.IsNullOrWhiteSpace(OptionalUpperTorso))
+                return false;
+            return !string.Equals(OptionalUpperTorso, LeftUpperArm, StringComparison.Ordinal) &&
+                   !string.Equals(OptionalUpperTorso, RightUpperArm, StringComparison.Ordinal) &&
+                   !string.Equals(OptionalUpperTorso, LeftThigh, StringComparison.Ordinal) &&
+                   !string.Equals(OptionalUpperTorso, RightThigh, StringComparison.Ordinal) &&
+                   !string.Equals(OptionalUpperTorso, LeftCalf, StringComparison.Ordinal) &&
+                   !string.Equals(OptionalUpperTorso, RightCalf, StringComparison.Ordinal);
+        }
 
         internal bool IsValid()
         {
