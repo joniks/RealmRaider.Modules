@@ -49,7 +49,10 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles
             MotionClipKey.AttackPrimary,
             MotionClipKey.AttackAbility,
             MotionClipKey.Hit,
-            MotionClipKey.Death
+            MotionClipKey.Death,
+            MotionClipKey.JumpTakeoff,
+            MotionClipKey.JumpFall,
+            MotionClipKey.JumpLand
         };
 
         private static readonly string[] RequiredRootFields =
@@ -133,6 +136,9 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles
             {
                 case MotionClipKey.Idle: return "idle";
                 case MotionClipKey.Locomotion: return "locomotion";
+                case MotionClipKey.JumpTakeoff: return "jump_takeoff";
+                case MotionClipKey.JumpFall: return "jump_fall";
+                case MotionClipKey.JumpLand: return "jump_land";
                 case MotionClipKey.AttackPrimary: return "attack_primary";
                 case MotionClipKey.AttackAbility: return "attack_ability";
                 case MotionClipKey.Hit: return "hit";

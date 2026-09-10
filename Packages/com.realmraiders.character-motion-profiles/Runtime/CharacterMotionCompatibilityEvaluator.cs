@@ -75,7 +75,10 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles
             MotionClipKey.AttackPrimary,
             MotionClipKey.AttackAbility,
             MotionClipKey.Hit,
-            MotionClipKey.Death
+            MotionClipKey.Death,
+            MotionClipKey.JumpTakeoff,
+            MotionClipKey.JumpFall,
+            MotionClipKey.JumpLand
         };
 
         public static CharacterMotionCompatibilityResult Evaluate(

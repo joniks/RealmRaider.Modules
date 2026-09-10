@@ -187,6 +187,9 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
         {
             yield return Clip(MotionClipKey.Idle, suffix);
             yield return Clip(MotionClipKey.Locomotion, suffix);
+            yield return Clip(MotionClipKey.JumpTakeoff, suffix);
+            yield return Clip(MotionClipKey.JumpFall, suffix);
+            yield return Clip(MotionClipKey.JumpLand, suffix);
             yield return Clip(MotionClipKey.AttackPrimary, suffix);
             yield return Clip(MotionClipKey.AttackAbility, suffix);
             yield return Clip(MotionClipKey.Hit, suffix);

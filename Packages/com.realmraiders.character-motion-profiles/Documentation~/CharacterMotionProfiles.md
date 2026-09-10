@@ -12,11 +12,13 @@ Version 0.3 adds an adapter-neutral compatibility gate. `CharacterMotionTargetRe
 
 Version 0.4 adds `CharacterMotionBindingBatchEvaluator`. It accepts only an explicit, already-built `CharacterMotionProfileCatalogue` and explicit `CharacterMotionBindingRequest` values. Each request names a character, one exact motion profile ID, and `CharacterMotionTargetRequirements`; the batch layer does not select a fallback or search for another profile.
 
+Version 0.5 expands the closed semantic key set to nine keys and adds `CharacterMotionPresentationResolver`. Its zero-allocation immutable value input is supplied by an owning adapter as mutually exclusive factual reaction, attack and jump-phase enums plus locomotion; it returns only a semantic `MotionClipKey`, never a profile, asset, timing decision, movement command, or gameplay change.
+
 ## Closed v1 schema
 
 A profile contains exactly these root fields in canonical order: `schemaVersion`, `motionProfileId`, `family`, `rigProfileId`, `animatorProfileId`, `clips`, `rhythmProfile`, `fallbackProfileId`, and `sourceIds`.
 
-The clip set contains exactly one binding for each fixed key: `idle`, `locomotion`, `attack_primary`, `attack_ability`, `hit`, and `death`. Each binding records its assigned key, stable clip ID, and source-declared family, rig profile ID, and key. Validation rejects a binding before serialization when that declared metadata does not match its profile/assignment.
+The clip set contains exactly one binding for each fixed key: `idle`, `locomotion`, `attack_primary`, `attack_ability`, `hit`, `death`, `jump_takeoff`, `jump_fall`, and `jump_land`. Existing six-key enum ordinals remain explicit and unchanged; the three jump keys follow them. Each binding records its assigned key, stable clip ID, and source-declared family, rig profile ID, and key. Validation rejects a binding before serialization when that declared metadata does not match its profile/assignment.
 
 Rhythm is limited to `neutral`, `sylvan`, or `infernal`. It is descriptive identity only; this package stores no phase duration, playback curve, damage frame, movement, target, invulnerability, cooldown, controller, possession, or death authority.
 
@@ -32,7 +34,7 @@ Provider discovery, reflection, filesystem/network access, singleton/global regi
 
 ## Deterministic compatibility gate
 
-Compatibility is fail-closed for null, unreadable, or invalid input. The target clip set must contain each of `idle`, `locomotion`, `attack_primary`, `attack_ability`, `hit`, and `death` exactly once; missing, duplicate, and unknown keys are structured failures. Rig comparison uses exact ordinal text, family comparison uses the shared body-family enum, and a target that disallows fallback rejects a profile with a declared fallback ID. The gate does not select a fallback, resolve a clip, inspect a rig, load an asset, or grant animation/gameplay authority.
+Compatibility is fail-closed for null, unreadable, or invalid input. The target clip set must contain all nine semantic keys exactly once; missing, duplicate, and unknown keys are structured failures. Rig comparison uses exact ordinal text, family comparison uses the shared body-family enum, and a target that disallows fallback rejects a profile with a declared fallback ID. The gate does not select a fallback, resolve a clip, inspect a rig, load an asset, or grant animation/gameplay authority.
 
 ## Explicit binding batch gate
 
@@ -40,10 +42,18 @@ The batch evaluator snapshots its request sequence, rejects null or unreadable i
 
 Batch construction is fail-closed: if any request is invalid, missing, duplicate, or incompatible, `Succeeded` is false and `Records` is empty. A successful result exposes immutable records sorted ordinally by `characterId`. It never discovers providers, resolves a starter profile, chooses an automatic fallback, loads an asset, or establishes animation or gameplay authority.
 
+## Presentation-key resolver
+
+`CharacterMotionPresentationResolver.Resolve` accepts an immutable, zero-allocation caller-owned value input. `MotionPresentationReaction` is exactly `none`, `hit`, or `death`; `MotionPresentationAttack` is exactly `none`, `primary`, or `ability`; and `MotionPresentationJumpPhase` is exactly `none`, `takeoff`, `falling`, or `landing`. These enum domains remove contradictory combinations within each state category. The resolver returns one visual key by fixed priority: `death` > `hit` > attack > jump phase > `locomotion` > `idle`.
+
+Unknown enum casts are deterministically treated as `none`, without throwing: an unknown reaction allows attack processing, an unknown attack allows jump processing, and an unknown jump phase falls through to locomotion/idle. The resolver never invents a transition or elapsed-time state.
+
+The resolver owns no state, elapsed time, transition, interruption, root motion, transform, controller, profile/catalogue lookup, clip lookup, asset, Unity object, or gameplay decision. An eventual adapter remains responsible for converting authoritative factual state into this input and for all lifecycle cleanup.
+
 ## Determinism
 
 - IDs use lowercase ASCII letters/digits with single `.` or `-` separators.
-- Clip bindings are canonicalized into the fixed six-key order; equivalent clip input order produces identical UTF-8 bytes and SHA-256 hash.
+- Clip bindings are canonicalized into the fixed nine-key ordinal order; equivalent clip input order produces identical UTF-8 bytes and SHA-256 hash.
 - Source IDs must be non-empty, unique across the entire list, and already sorted by ordinal comparison. Unordered or repeated sources are rejected, including non-adjacent repeats.
 - Canonical serialization emits fixed-order, whitespace-free UTF-8 JSON without a byte-order mark.
 - Invalid profiles cannot be serialized or hashed. The lowercase SHA-256 identifies profile content only; it is not an asset checksum, signature, save/network identity, or provenance record.
@@ -54,10 +64,10 @@ An eventual separately commissioned Core adapter may explicitly choose a validat
 
 This package does not authorize any rig, animation, model, or source. Source IDs point only to future accepted provenance records. Each asset still requires creator/title/version, direct source, archive checksum, exact licence/legal-code URL, commercial-use confirmation, attribution, modification notes, and selected-file/import records.
 
-## v1 schema and v0.4 catalogue/compatibility/batch limits
+## v1 schema and v0.5 catalogue/compatibility/batch/resolver limits
 
 - No Unity objects, `Animator`, `AnimationClip`, controllers, assets, curves, transforms, or import settings.
 - No actual family, faction, fallback, or starter-roster profile instances.
 - No gameplay phases/timings, root motion, animation events, damage, movement, targeting, AI, hit detection, dodge/root, health/death, possession, save, or balance authority.
 - No automatic discovery/registry, reflection scan, singleton, service locator, `Resources`, Addressables, filesystem access, scene injection, or runtime adapter.
-- No JSON parser, schema migration, editable metadata, absolute paths, scene aliases, timestamps, random values, or custom extension fields in v0.4.0.
+- No JSON parser, schema migration, editable metadata, absolute paths, scene aliases, timestamps, random values, or custom extension fields in v0.5.0.

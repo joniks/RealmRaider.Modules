@@ -6,12 +6,15 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles
 {
     public enum MotionClipKey
     {
-        Idle,
-        Locomotion,
-        AttackPrimary,
-        AttackAbility,
-        Hit,
-        Death
+        Idle = 0,
+        Locomotion = 1,
+        AttackPrimary = 2,
+        AttackAbility = 3,
+        Hit = 4,
+        Death = 5,
+        JumpTakeoff = 6,
+        JumpFall = 7,
+        JumpLand = 8
     }
 
     public enum MotionRhythm

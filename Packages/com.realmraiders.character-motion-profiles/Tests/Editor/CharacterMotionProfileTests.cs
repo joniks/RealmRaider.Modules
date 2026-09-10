@@ -28,6 +28,20 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
         }
 
         [Test]
+        public void MotionClipKeys_PreserveExistingOrdinalsAndAppendJumpKeys()
+        {
+            Assert.That((int)MotionClipKey.Idle, Is.EqualTo(0));
+            Assert.That((int)MotionClipKey.Locomotion, Is.EqualTo(1));
+            Assert.That((int)MotionClipKey.AttackPrimary, Is.EqualTo(2));
+            Assert.That((int)MotionClipKey.AttackAbility, Is.EqualTo(3));
+            Assert.That((int)MotionClipKey.Hit, Is.EqualTo(4));
+            Assert.That((int)MotionClipKey.Death, Is.EqualTo(5));
+            Assert.That((int)MotionClipKey.JumpTakeoff, Is.EqualTo(6));
+            Assert.That((int)MotionClipKey.JumpFall, Is.EqualTo(7));
+            Assert.That((int)MotionClipKey.JumpLand, Is.EqualTo(8));
+        }
+
+        [Test]
         public void Validator_RejectsUnsupportedSchemaInvalidIdsFamilyAndRhythm()
         {
             var profile = new CharacterMotionProfile(
@@ -52,7 +66,7 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
         }
 
         [Test]
-        public void Validator_RequiresExactlySixKnownUniqueClipKeys()
+        public void Validator_RequiresExactlyNineKnownUniqueClipKeys()
         {
             var missing = ValidProfile(RequiredClips().Where(clip => clip.AssignedKey != MotionClipKey.Death));
             var duplicate = ValidProfile(RequiredClips().Concat(new[] { Clip(MotionClipKey.Idle) }));
@@ -162,6 +176,9 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
         {
             yield return Clip(MotionClipKey.Idle);
             yield return Clip(MotionClipKey.Locomotion);
+            yield return Clip(MotionClipKey.JumpTakeoff);
+            yield return Clip(MotionClipKey.JumpFall);
+            yield return Clip(MotionClipKey.JumpLand);
             yield return Clip(MotionClipKey.AttackPrimary);
             yield return Clip(MotionClipKey.AttackAbility);
             yield return Clip(MotionClipKey.Hit);

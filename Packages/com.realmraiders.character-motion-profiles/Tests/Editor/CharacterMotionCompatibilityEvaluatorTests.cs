@@ -11,7 +11,7 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
     public sealed class CharacterMotionCompatibilityEvaluatorTests
     {
         [Test]
-        public void MatchingProfileAndReorderedSixKeyTarget_AreCompatible()
+        public void MatchingProfileAndReorderedNineKeyTarget_AreCompatible()
         {
             var profile = ValidProfile(clips: RequiredClips().Reverse());
             var target = ValidTarget(requiredClipKeys: RequiredKeys().Reverse());
@@ -65,6 +65,9 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
                 Clip(MotionClipKey.Idle),
                 Clip(MotionClipKey.Idle, clipSuffix: "idle-duplicate"),
                 Clip(MotionClipKey.Locomotion),
+                Clip(MotionClipKey.JumpTakeoff),
+                Clip(MotionClipKey.JumpFall),
+                Clip(MotionClipKey.JumpLand),
                 Clip(MotionClipKey.AttackPrimary, declaredKey: MotionClipKey.Hit),
                 Clip(MotionClipKey.AttackAbility),
                 Clip(MotionClipKey.Hit)
@@ -168,6 +171,9 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
                 MotionClipKey.Idle,
                 MotionClipKey.Idle,
                 MotionClipKey.Locomotion,
+                MotionClipKey.JumpTakeoff,
+                MotionClipKey.JumpFall,
+                MotionClipKey.JumpLand,
                 MotionClipKey.AttackPrimary,
                 MotionClipKey.AttackAbility,
                 MotionClipKey.Hit,
@@ -204,7 +210,7 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
                 ValidProfile(),
                 target);
 
-            Assert.That(target.RequiredClipKeys.Count, Is.EqualTo(6));
+            Assert.That(target.RequiredClipKeys.Count, Is.EqualTo(9));
             Assert.That(result.IsCompatible, Is.True);
             Assert.Throws<NotSupportedException>(() =>
                 ((IList<MotionClipKey>)target.RequiredClipKeys).Clear());
@@ -291,6 +297,9 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
         {
             yield return MotionClipKey.Idle;
             yield return MotionClipKey.Locomotion;
+            yield return MotionClipKey.JumpTakeoff;
+            yield return MotionClipKey.JumpFall;
+            yield return MotionClipKey.JumpLand;
             yield return MotionClipKey.AttackPrimary;
             yield return MotionClipKey.AttackAbility;
             yield return MotionClipKey.Hit;
@@ -301,6 +310,9 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
         {
             yield return Clip(MotionClipKey.Idle);
             yield return Clip(MotionClipKey.Locomotion);
+            yield return Clip(MotionClipKey.JumpTakeoff);
+            yield return Clip(MotionClipKey.JumpFall);
+            yield return Clip(MotionClipKey.JumpLand);
             yield return Clip(MotionClipKey.AttackPrimary);
             yield return Clip(MotionClipKey.AttackAbility);
             yield return Clip(MotionClipKey.Hit);
