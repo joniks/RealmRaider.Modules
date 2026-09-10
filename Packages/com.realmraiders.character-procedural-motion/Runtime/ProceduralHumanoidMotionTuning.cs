@@ -1,5 +1,36 @@
 namespace RealmRaiders.Modules.CharacterProceduralMotion
 {
+    public enum ProceduralHumanoidAttackStage { Windup = 0, Impact = 1, Recovery = 2 }
+
+    /// <summary>Explicit binding policy; legacy local-bone axes remain the default.</summary>
+    public enum ProceduralHumanoidAxisPolicy
+    {
+        LocalBoneAxes = 0,
+        CharacterSagittalPlane = 1,
+    }
+
+    /// <summary>Caller-owned factual combat presentation sample; all numeric inputs are sanitized by the driver.</summary>
+    public readonly struct ProceduralHumanoidCombatPoseSample
+    {
+        public ProceduralHumanoidCombatPoseSample(ProceduralHumanoidAttackStage attackStage, float attackProgress, float attackBlend, float signedAttackDirection, float hitProgress, float hitWeight, float signedRecoilDirection)
+        {
+            AttackStage = attackStage;
+            AttackProgress = attackProgress;
+            AttackBlend = attackBlend;
+            SignedAttackDirection = signedAttackDirection;
+            HitProgress = hitProgress;
+            HitWeight = hitWeight;
+            SignedRecoilDirection = signedRecoilDirection;
+        }
+
+        public ProceduralHumanoidAttackStage AttackStage { get; }
+        public float AttackProgress { get; }
+        public float AttackBlend { get; }
+        public float SignedAttackDirection { get; }
+        public float HitProgress { get; }
+        public float HitWeight { get; }
+        public float SignedRecoilDirection { get; }
+    }
     /// <summary>Closed set of safe local axes for additive limb presentation.</summary>
     public enum ProceduralHumanoidLocalAxis
     {
@@ -137,6 +168,10 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         public const float MaxSwingCadenceRadiansPerSecond = 16f;
         public const float BloodKnightLocomotionMaxAdditiveAngleDegrees = 60f;
         public const float BloodKnightCrouchMaxAdditiveAngleDegrees = 90f;
+        public static readonly ProceduralHumanoidLimbPose BloodKnightAttackWindup = new ProceduralHumanoidLimbPose(-18f, -8f, 4f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward);
+        public static readonly ProceduralHumanoidLimbPose BloodKnightAttackImpact = new ProceduralHumanoidLimbPose(30f, 14f, -8f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward);
+        public static readonly ProceduralHumanoidLimbPose BloodKnightAttackRecovery = new ProceduralHumanoidLimbPose(10f, 5f, -3f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward);
+        public static readonly ProceduralHumanoidLimbPose BloodKnightDirectionalHit = new ProceduralHumanoidLimbPose(16f, -12f, 6f, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward, ProceduralHumanoidLocalAxis.Forward);
 
         public static readonly ProceduralHumanoidMotionTuning CompatibilityDefault =
             new ProceduralHumanoidMotionTuning(

@@ -37,6 +37,13 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         private Vector3 rightThighScaleBaseline;
         private Vector3 leftCalfScaleBaseline;
         private Vector3 rightCalfScaleBaseline;
+        private Vector3 leftUpperArmSagittalAxis;
+        private Vector3 rightUpperArmSagittalAxis;
+        private Vector3 leftThighSagittalAxis;
+        private Vector3 rightThighSagittalAxis;
+        private Vector3 leftCalfSagittalAxis;
+        private Vector3 rightCalfSagittalAxis;
+        private bool usesCharacterSagittalPlane;
         private readonly ProceduralHumanoidMotionTuning tuning;
 
         public bool IsBound => visualRoot != null;
@@ -50,8 +57,39 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         /// <summary>Restores any prior binding before attempting a new exact local bind.</summary>
         public bool Bind(Transform suppliedVisualRoot, HumanoidBoneNameMap names)
         {
+            return BindInternal(suppliedVisualRoot, null, names, ProceduralHumanoidAxisPolicy.LocalBoneAxes);
+        }
+
+        /// <summary>Binds an explicit character-oriented reference for opt-in sagittal presentation.</summary>
+        public bool Bind(
+            Transform suppliedVisualRoot,
+            Transform characterOrientationReference,
+            HumanoidBoneNameMap names,
+            ProceduralHumanoidAxisPolicy axisPolicy)
+        {
+            if (characterOrientationReference == null || !HasSupportedScale(characterOrientationReference))
+            {
+                Clear();
+                return false;
+            }
+            return BindInternal(suppliedVisualRoot, characterOrientationReference, names, axisPolicy);
+        }
+
+        private bool BindInternal(
+            Transform suppliedVisualRoot,
+            Transform characterOrientationReference,
+            HumanoidBoneNameMap names,
+            ProceduralHumanoidAxisPolicy axisPolicy)
+        {
             Clear();
-            if (suppliedVisualRoot == null || names == null || !names.IsValid())
+            if (suppliedVisualRoot == null || names == null || !names.IsValid() ||
+                (axisPolicy != ProceduralHumanoidAxisPolicy.LocalBoneAxes &&
+                 axisPolicy != ProceduralHumanoidAxisPolicy.CharacterSagittalPlane))
+                return false;
+            if (axisPolicy == ProceduralHumanoidAxisPolicy.CharacterSagittalPlane &&
+                (characterOrientationReference == null ||
+                 !HasSupportedScale(suppliedVisualRoot) ||
+                 !HasSupportedScale(characterOrientationReference)))
                 return false;
 
             var descendants = suppliedVisualRoot.GetComponentsInChildren<Transform>(true);
@@ -80,6 +118,12 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
                 foundLeftCalf == null || foundRightCalf == null)
                 return false;
 
+            if (axisPolicy == ProceduralHumanoidAxisPolicy.CharacterSagittalPlane &&
+                (!HasSupportedScale(foundLeftUpperArm) || !HasSupportedScale(foundRightUpperArm) ||
+                 !HasSupportedScale(foundLeftThigh) || !HasSupportedScale(foundRightThigh) ||
+                 !HasSupportedScale(foundLeftCalf) || !HasSupportedScale(foundRightCalf)))
+                return false;
+
             visualRoot = suppliedVisualRoot;
             leftUpperArm = foundLeftUpperArm;
             rightUpperArm = foundRightUpperArm;
@@ -88,6 +132,13 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             leftCalf = foundLeftCalf;
             rightCalf = foundRightCalf;
             CaptureBaselines();
+            if (axisPolicy == ProceduralHumanoidAxisPolicy.CharacterSagittalPlane &&
+                !TryCacheSagittalAxes(characterOrientationReference))
+            {
+                Clear();
+                return false;
+            }
+            usesCharacterSagittalPlane = axisPolicy == ProceduralHumanoidAxisPolicy.CharacterSagittalPlane;
             return true;
         }
 
@@ -98,7 +149,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             float presentationClock,
             float deltaTime)
         {
-            SampleInternal(input, normalizedLocomotionSpeed, presentationClock, deltaTime, 1f, true);
+            SampleInternal(input, normalizedLocomotionSpeed, presentationClock, deltaTime, 1f, true, true);
         }
 
         /// <summary>Samples caller-owned normalized jump progress; this driver has no time authority.</summary>
@@ -109,7 +160,13 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             float deltaTime,
             float normalizedJumpPresentationProgress)
         {
-            SampleInternal(input, normalizedLocomotionSpeed, presentationClock, deltaTime, normalizedJumpPresentationProgress, false);
+            SampleInternal(input, normalizedLocomotionSpeed, presentationClock, deltaTime, normalizedJumpPresentationProgress, false, true, default(ProceduralHumanoidCombatPoseSample));
+        }
+
+        /// <summary>Samples explicit combat facts without changing resolver priority or owning timing.</summary>
+        public void Sample(CharacterMotionPresentationInput input, float normalizedLocomotionSpeed, float presentationClock, float deltaTime, float normalizedJumpPresentationProgress, ProceduralHumanoidCombatPoseSample combat)
+        {
+            SampleInternal(input, normalizedLocomotionSpeed, presentationClock, deltaTime, normalizedJumpPresentationProgress, false, false, combat);
         }
 
         private void SampleInternal(
@@ -118,7 +175,9 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             float presentationClock,
             float deltaTime,
             float normalizedJumpPresentationProgress,
-            bool useLegacyStaticJumpPose)
+            bool useLegacyStaticJumpPose,
+            bool useLegacyCombatPose,
+            ProceduralHumanoidCombatPoseSample combat = default(ProceduralHumanoidCombatPoseSample))
         {
             if (!IsBound)
                 return;
@@ -142,19 +201,19 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
                     ApplyJumpTakeoff(jumpProgress);
                     break;
                 case MotionClipKey.JumpFall:
-                    if (useLegacyStaticJumpPose) ApplyPose(tuning.JumpFall); else ApplyJumpFall(jumpProgress);
+                    if (useLegacyStaticJumpPose) ApplyPose(tuning.JumpFall, 1f, UsesBloodKnightSagittalPlane); else ApplyJumpFall(jumpProgress);
                     break;
                 case MotionClipKey.JumpLand:
-                    if (useLegacyStaticJumpPose) ApplyPose(tuning.JumpLand); else ApplyJumpLand(jumpProgress);
+                    if (useLegacyStaticJumpPose) ApplyPose(tuning.JumpLand, 1f, UsesBloodKnightSagittalPlane); else ApplyJumpLand(jumpProgress);
                     break;
                 case MotionClipKey.AttackPrimary:
-                    ApplyPrimaryAttack();
+                    if (useLegacyCombatPose) ApplyPrimaryAttack(); else { ApplyLiveBase(speed, swing); ApplyCombatAttack(combat); }
                     break;
                 case MotionClipKey.AttackAbility:
-                    ApplyAbilityAttack();
+                    if (useLegacyCombatPose) ApplyAbilityAttack(); else { ApplyLiveBase(speed, swing); ApplyCombatAttack(combat); }
                     break;
                 case MotionClipKey.Hit:
-                    ApplyHit();
+                    if (useLegacyCombatPose) ApplyHit(); else { ApplyLiveBase(speed, swing); ApplyCombatHit(combat); }
                     break;
                 case MotionClipKey.Death:
                     ApplyDeathSettle();
@@ -174,6 +233,51 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             rightThigh = null;
             leftCalf = null;
             rightCalf = null;
+            leftUpperArmSagittalAxis = Vector3.zero;
+            rightUpperArmSagittalAxis = Vector3.zero;
+            leftThighSagittalAxis = Vector3.zero;
+            rightThighSagittalAxis = Vector3.zero;
+            leftCalfSagittalAxis = Vector3.zero;
+            rightCalfSagittalAxis = Vector3.zero;
+            usesCharacterSagittalPlane = false;
+        }
+
+        private bool TryCacheSagittalAxes(Transform characterOrientationReference)
+        {
+            var referenceRight = characterOrientationReference.rotation * Vector3.right;
+            if (!IsFinite(referenceRight) || referenceRight.sqrMagnitude < 0.999f)
+                return false;
+            referenceRight.Normalize();
+
+            return TryCalculateLocalAxis(leftUpperArm, referenceRight, out leftUpperArmSagittalAxis) &&
+                   TryCalculateLocalAxis(rightUpperArm, referenceRight, out rightUpperArmSagittalAxis) &&
+                   TryCalculateLocalAxis(leftThigh, referenceRight, out leftThighSagittalAxis) &&
+                   TryCalculateLocalAxis(rightThigh, referenceRight, out rightThighSagittalAxis) &&
+                   TryCalculateLocalAxis(leftCalf, referenceRight, out leftCalfSagittalAxis) &&
+                   TryCalculateLocalAxis(rightCalf, referenceRight, out rightCalfSagittalAxis);
+        }
+
+        private static bool TryCalculateLocalAxis(Transform bone, Vector3 referenceRight, out Vector3 localAxis)
+        {
+            var baselineWorldRotation = bone.rotation;
+            localAxis = Quaternion.Inverse(baselineWorldRotation) * referenceRight;
+            if (!IsFinite(baselineWorldRotation) || !IsFinite(localAxis) || localAxis.sqrMagnitude < 0.999f)
+            {
+                localAxis = Vector3.zero;
+                return false;
+            }
+
+            localAxis.Normalize();
+            return true;
+        }
+
+        private static bool HasSupportedScale(Transform transform)
+        {
+            var scale = transform.lossyScale;
+            if (!IsFinite(scale) || Mathf.Abs(scale.x) < 0.0001f || Mathf.Abs(scale.y) < 0.0001f || Mathf.Abs(scale.z) < 0.0001f)
+                return false;
+            var determinant = transform.localToWorldMatrix.determinant;
+            return IsFinite(determinant) && determinant > 0.000001f;
         }
 
         private static bool TryAssign(Transform candidate, string requiredName, ref Transform assigned)
@@ -241,32 +345,38 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             var arm = tuning.Locomotion.UpperArmDegrees * speed * swing;
             var thigh = tuning.Locomotion.ThighDegrees * speed * swing;
             var calf = tuning.Locomotion.CalfDegrees * speed * swing;
-            AddRotation(leftUpperArm, leftUpperArmBaseline, Axis(tuning.Locomotion.UpperArmAxis), arm, tuning.Locomotion.MaxAdditiveAngleDegrees);
-            AddRotation(rightUpperArm, rightUpperArmBaseline, Axis(tuning.Locomotion.UpperArmAxis), -arm, tuning.Locomotion.MaxAdditiveAngleDegrees);
-            AddRotation(leftThigh, leftThighBaseline, Axis(tuning.Locomotion.ThighAxis), -thigh, tuning.Locomotion.MaxAdditiveAngleDegrees);
-            AddRotation(rightThigh, rightThighBaseline, Axis(tuning.Locomotion.ThighAxis), thigh, tuning.Locomotion.MaxAdditiveAngleDegrees);
-            AddRotation(leftCalf, leftCalfBaseline, Axis(tuning.Locomotion.CalfAxis), calf, tuning.Locomotion.MaxAdditiveAngleDegrees);
-            AddRotation(rightCalf, rightCalfBaseline, Axis(tuning.Locomotion.CalfAxis), -calf, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            var useSemanticAxis = UsesBloodKnightSagittalPlane;
+            AddRotation(leftUpperArm, leftUpperArmBaseline, EffectiveAxis(leftUpperArm, tuning.Locomotion.UpperArmAxis, useSemanticAxis), arm, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(rightUpperArm, rightUpperArmBaseline, EffectiveAxis(rightUpperArm, tuning.Locomotion.UpperArmAxis, useSemanticAxis), -arm, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(leftThigh, leftThighBaseline, EffectiveAxis(leftThigh, tuning.Locomotion.ThighAxis, useSemanticAxis), -thigh, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(rightThigh, rightThighBaseline, EffectiveAxis(rightThigh, tuning.Locomotion.ThighAxis, useSemanticAxis), thigh, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(leftCalf, leftCalfBaseline, EffectiveAxis(leftCalf, tuning.Locomotion.CalfAxis, useSemanticAxis), calf, tuning.Locomotion.MaxAdditiveAngleDegrees);
+            AddRotation(rightCalf, rightCalfBaseline, EffectiveAxis(rightCalf, tuning.Locomotion.CalfAxis, useSemanticAxis), -calf, tuning.Locomotion.MaxAdditiveAngleDegrees);
+        }
+
+        private void ApplyLiveBase(float speed, float swing)
+        {
+            if (speed > 0f) ApplyLocomotion(swing, speed); else ApplyIdle(swing);
         }
 
         private void ApplyJumpTakeoff(float progress)
         {
             var crouch = tuning.DeepCrouch;
             var push = tuning.AsymmetricJumpTakeoff;
-            ApplyTakeoff(progress, crouch, push);
+            ApplyTakeoff(progress, crouch, push, UsesBloodKnightSagittalPlane);
         }
 
         private void ApplyJumpFall(float progress)
         {
-            ApplyTakeoffToPose(progress, tuning.AsymmetricJumpTakeoff, tuning.JumpFall);
+            ApplyTakeoffToPose(progress, tuning.AsymmetricJumpTakeoff, tuning.JumpFall, UsesBloodKnightSagittalPlane);
         }
 
         private void ApplyJumpLand(float progress)
         {
             if (progress <= 0.5f)
-                ApplyPoseTransition(tuning.JumpFall, tuning.JumpLand, progress * 2f);
+                ApplyPoseTransition(tuning.JumpFall, tuning.JumpLand, progress * 2f, UsesBloodKnightSagittalPlane);
             else
-                ApplyPose(tuning.JumpLand, 2f - progress * 2f);
+                ApplyPose(tuning.JumpLand, 2f - progress * 2f, UsesBloodKnightSagittalPlane);
         }
 
         private void ApplyPrimaryAttack()
@@ -285,61 +395,119 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             ApplyPose(tuning.Hit);
         }
 
+        private void ApplyCombatAttack(ProceduralHumanoidCombatPoseSample combat)
+        {
+            var progress = Finite01(combat.AttackProgress);
+            var blend = Finite01(combat.AttackBlend);
+            var direction = Signed(combat.SignedAttackDirection);
+            var windup = IsBloodKnightTuning() ? ProceduralHumanoidMotionTuning.BloodKnightAttackWindup : tuning.AbilityAttack;
+            var impact = IsBloodKnightTuning() ? ProceduralHumanoidMotionTuning.BloodKnightAttackImpact : tuning.AbilityAttack;
+            var recovery = IsBloodKnightTuning() ? ProceduralHumanoidMotionTuning.BloodKnightAttackRecovery : tuning.AbilityAttack;
+            var stage = ClampAttackStage(combat.AttackStage);
+            var useSemanticAxis = UsesBloodKnightSagittalPlane;
+            if (stage == ProceduralHumanoidAttackStage.Windup)
+                ApplyDirectionalPose(windup, direction, progress * blend, useSemanticAxis);
+            else if (stage == ProceduralHumanoidAttackStage.Impact)
+                ApplyDirectionalTransition(windup, impact, direction, progress, blend, useSemanticAxis);
+            else if (progress <= 0.5f)
+                ApplyDirectionalTransition(impact, recovery, direction, progress * 2f, blend, useSemanticAxis);
+            else
+                ApplyDirectionalPose(recovery, direction, (2f - progress * 2f) * blend, useSemanticAxis);
+        }
+
+        private void ApplyCombatHit(ProceduralHumanoidCombatPoseSample combat)
+        {
+            var progress = Finite01(combat.HitProgress);
+            var envelope = progress <= 0.5f ? progress * 2f : 2f - progress * 2f;
+            ApplyDirectionalPose(
+                IsBloodKnightTuning() ? ProceduralHumanoidMotionTuning.BloodKnightDirectionalHit : tuning.Hit,
+                Signed(combat.SignedRecoilDirection),
+                envelope * Finite01(combat.HitWeight),
+                UsesBloodKnightSagittalPlane);
+        }
+
+        private void ApplyDirectionalPose(ProceduralHumanoidLimbPose pose, float direction, float weight, bool useSemanticAxis)
+        {
+            var leftLead = 1f + 0.35f * direction;
+            var rightLead = 1f - 0.35f * direction;
+            AddOverlayRotation(leftUpperArm, leftUpperArmBaseline, pose.UpperArmAxis, pose.UpperArmDegrees * weight * leftLead, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
+            AddOverlayRotation(rightUpperArm, rightUpperArmBaseline, pose.UpperArmAxis, pose.UpperArmDegrees * weight * rightLead, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
+            AddOverlayRotation(leftThigh, leftThighBaseline, pose.ThighAxis, pose.ThighDegrees * weight * leftLead, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
+            AddOverlayRotation(rightThigh, rightThighBaseline, pose.ThighAxis, pose.ThighDegrees * weight * rightLead, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
+            AddOverlayRotation(leftCalf, leftCalfBaseline, pose.CalfAxis, pose.CalfDegrees * weight * leftLead, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
+            AddOverlayRotation(rightCalf, rightCalfBaseline, pose.CalfAxis, pose.CalfDegrees * weight * rightLead, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
+        }
+
+        private void ApplyDirectionalTransition(ProceduralHumanoidLimbPose start, ProceduralHumanoidLimbPose end, float direction, float progress, float weight, bool useSemanticAxis)
+        {
+            ApplyDirectionalPose(
+                new ProceduralHumanoidLimbPose(
+                    Mathf.Lerp(start.UpperArmDegrees, end.UpperArmDegrees, progress),
+                    Mathf.Lerp(start.ThighDegrees, end.ThighDegrees, progress),
+                    Mathf.Lerp(start.CalfDegrees, end.CalfDegrees, progress),
+                    start.UpperArmAxis,
+                    start.ThighAxis,
+                    start.CalfAxis),
+                direction,
+                weight,
+                useSemanticAxis);
+        }
+
         private void ApplyDeathSettle()
         {
             ApplyPose(tuning.Death);
         }
 
-        private void ApplyTakeoff(float progress, ProceduralHumanoidTakeoffPose crouch, ProceduralHumanoidTakeoffPose push)
+        private void ApplyTakeoff(float progress, ProceduralHumanoidTakeoffPose crouch, ProceduralHumanoidTakeoffPose push, bool useSemanticAxis)
         {
             var maximum = Mathf.Lerp(crouch.MaxAdditiveAngleDegrees, push.MaxAdditiveAngleDegrees, progress);
             var usePushAxis = progress >= 0.5f;
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(crouch.UpperArmDegrees, push.UpperArmDegrees, progress), usePushAxis ? push.UpperArmAxis : crouch.UpperArmAxis, maximum);
-            AddRotation(leftThigh, leftThighBaseline, Axis(usePushAxis ? push.LeftThighAxis : crouch.LeftThighAxis), Mathf.Lerp(crouch.LeftThighDegrees, push.LeftThighDegrees, progress), maximum);
-            AddRotation(rightThigh, rightThighBaseline, Axis(usePushAxis ? push.RightThighAxis : crouch.RightThighAxis), Mathf.Lerp(crouch.RightThighDegrees, push.RightThighDegrees, progress), maximum);
-            AddRotation(leftCalf, leftCalfBaseline, Axis(usePushAxis ? push.LeftCalfAxis : crouch.LeftCalfAxis), Mathf.Lerp(crouch.LeftCalfDegrees, push.LeftCalfDegrees, progress), maximum);
-            AddRotation(rightCalf, rightCalfBaseline, Axis(usePushAxis ? push.RightCalfAxis : crouch.RightCalfAxis), Mathf.Lerp(crouch.RightCalfDegrees, push.RightCalfDegrees, progress), maximum);
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(crouch.UpperArmDegrees, push.UpperArmDegrees, progress), usePushAxis ? push.UpperArmAxis : crouch.UpperArmAxis, maximum, useSemanticAxis);
+            AddRotation(leftThigh, leftThighBaseline, EffectiveAxis(leftThigh, usePushAxis ? push.LeftThighAxis : crouch.LeftThighAxis, useSemanticAxis), Mathf.Lerp(crouch.LeftThighDegrees, push.LeftThighDegrees, progress), maximum);
+            AddRotation(rightThigh, rightThighBaseline, EffectiveAxis(rightThigh, usePushAxis ? push.RightThighAxis : crouch.RightThighAxis, useSemanticAxis), Mathf.Lerp(crouch.RightThighDegrees, push.RightThighDegrees, progress), maximum);
+            AddRotation(leftCalf, leftCalfBaseline, EffectiveAxis(leftCalf, usePushAxis ? push.LeftCalfAxis : crouch.LeftCalfAxis, useSemanticAxis), Mathf.Lerp(crouch.LeftCalfDegrees, push.LeftCalfDegrees, progress), maximum);
+            AddRotation(rightCalf, rightCalfBaseline, EffectiveAxis(rightCalf, usePushAxis ? push.RightCalfAxis : crouch.RightCalfAxis, useSemanticAxis), Mathf.Lerp(crouch.RightCalfDegrees, push.RightCalfDegrees, progress), maximum);
         }
 
-        private void ApplyTakeoffToPose(float progress, ProceduralHumanoidTakeoffPose start, ProceduralHumanoidLimbPose end)
+        private void ApplyTakeoffToPose(float progress, ProceduralHumanoidTakeoffPose start, ProceduralHumanoidLimbPose end, bool useSemanticAxis)
         {
             var maximum = Mathf.Lerp(start.MaxAdditiveAngleDegrees, end.MaxAdditiveAngleDegrees, progress);
             var useEndAxis = progress >= 0.5f;
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(start.UpperArmDegrees, end.UpperArmDegrees, progress), useEndAxis ? end.UpperArmAxis : start.UpperArmAxis, maximum);
-            AddRotation(leftThigh, leftThighBaseline, Axis(useEndAxis ? end.ThighAxis : start.LeftThighAxis), Mathf.Lerp(start.LeftThighDegrees, end.ThighDegrees, progress), maximum);
-            AddRotation(rightThigh, rightThighBaseline, Axis(useEndAxis ? end.ThighAxis : start.RightThighAxis), Mathf.Lerp(start.RightThighDegrees, end.ThighDegrees, progress), maximum);
-            AddRotation(leftCalf, leftCalfBaseline, Axis(useEndAxis ? end.CalfAxis : start.LeftCalfAxis), Mathf.Lerp(start.LeftCalfDegrees, end.CalfDegrees, progress), maximum);
-            AddRotation(rightCalf, rightCalfBaseline, Axis(useEndAxis ? end.CalfAxis : start.RightCalfAxis), Mathf.Lerp(start.RightCalfDegrees, end.CalfDegrees, progress), maximum);
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(start.UpperArmDegrees, end.UpperArmDegrees, progress), useEndAxis ? end.UpperArmAxis : start.UpperArmAxis, maximum, useSemanticAxis);
+            AddRotation(leftThigh, leftThighBaseline, EffectiveAxis(leftThigh, useEndAxis ? end.ThighAxis : start.LeftThighAxis, useSemanticAxis), Mathf.Lerp(start.LeftThighDegrees, end.ThighDegrees, progress), maximum);
+            AddRotation(rightThigh, rightThighBaseline, EffectiveAxis(rightThigh, useEndAxis ? end.ThighAxis : start.RightThighAxis, useSemanticAxis), Mathf.Lerp(start.RightThighDegrees, end.ThighDegrees, progress), maximum);
+            AddRotation(leftCalf, leftCalfBaseline, EffectiveAxis(leftCalf, useEndAxis ? end.CalfAxis : start.LeftCalfAxis, useSemanticAxis), Mathf.Lerp(start.LeftCalfDegrees, end.CalfDegrees, progress), maximum);
+            AddRotation(rightCalf, rightCalfBaseline, EffectiveAxis(rightCalf, useEndAxis ? end.CalfAxis : start.RightCalfAxis, useSemanticAxis), Mathf.Lerp(start.RightCalfDegrees, end.CalfDegrees, progress), maximum);
         }
 
-        private void ApplyPoseTransition(ProceduralHumanoidLimbPose start, ProceduralHumanoidLimbPose end, float progress)
+        private void ApplyPoseTransition(ProceduralHumanoidLimbPose start, ProceduralHumanoidLimbPose end, float progress, bool useSemanticAxis)
         {
             var maximum = Mathf.Lerp(start.MaxAdditiveAngleDegrees, end.MaxAdditiveAngleDegrees, progress);
             var useEndAxis = progress >= 0.5f;
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(start.UpperArmDegrees, end.UpperArmDegrees, progress), useEndAxis ? end.UpperArmAxis : start.UpperArmAxis, maximum);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, Mathf.Lerp(start.ThighDegrees, end.ThighDegrees, progress), useEndAxis ? end.ThighAxis : start.ThighAxis, maximum);
-            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, Mathf.Lerp(start.CalfDegrees, end.CalfDegrees, progress), useEndAxis ? end.CalfAxis : start.CalfAxis, maximum);
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, Mathf.Lerp(start.UpperArmDegrees, end.UpperArmDegrees, progress), useEndAxis ? end.UpperArmAxis : start.UpperArmAxis, maximum, useSemanticAxis);
+            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, Mathf.Lerp(start.ThighDegrees, end.ThighDegrees, progress), useEndAxis ? end.ThighAxis : start.ThighAxis, maximum, useSemanticAxis);
+            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, Mathf.Lerp(start.CalfDegrees, end.CalfDegrees, progress), useEndAxis ? end.CalfAxis : start.CalfAxis, maximum, useSemanticAxis);
         }
 
-        private void ApplyPose(ProceduralHumanoidLimbPose pose, float weight = 1f)
+        private void ApplyPose(ProceduralHumanoidLimbPose pose, float weight = 1f, bool useSemanticAxis = false)
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees * weight, pose.UpperArmAxis, pose.MaxAdditiveAngleDegrees);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, pose.ThighDegrees * weight, pose.ThighAxis, pose.MaxAdditiveAngleDegrees);
-            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, pose.CalfDegrees * weight, pose.CalfAxis, pose.MaxAdditiveAngleDegrees);
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees * weight, pose.UpperArmAxis, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
+            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, pose.ThighDegrees * weight, pose.ThighAxis, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
+            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, pose.CalfDegrees * weight, pose.CalfAxis, pose.MaxAdditiveAngleDegrees, useSemanticAxis);
         }
 
-        private static void ApplyPair(
+        private void ApplyPair(
             Transform left,
             Quaternion leftBaseline,
             Transform right,
             Quaternion rightBaseline,
             float degrees,
             ProceduralHumanoidLocalAxis axis,
-            float maximum)
+            float maximum,
+            bool useSemanticAxis)
         {
-            var vector = Axis(axis);
-            AddRotation(left, leftBaseline, vector, degrees, maximum);
-            AddRotation(right, rightBaseline, vector, degrees, maximum);
+            AddRotation(left, leftBaseline, EffectiveAxis(left, axis, useSemanticAxis), degrees, maximum);
+            AddRotation(right, rightBaseline, EffectiveAxis(right, axis, useSemanticAxis), degrees, maximum);
         }
 
         private static Vector3 Axis(ProceduralHumanoidLocalAxis axis)
@@ -355,15 +523,68 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             }
         }
 
+        private Vector3 EffectiveAxis(Transform target, ProceduralHumanoidLocalAxis localAxis, bool useSemanticAxis)
+        {
+            if (!useSemanticAxis)
+                return Axis(localAxis);
+            if (target == leftUpperArm)
+                return leftUpperArmSagittalAxis;
+            if (target == rightUpperArm)
+                return rightUpperArmSagittalAxis;
+            if (target == leftThigh)
+                return leftThighSagittalAxis;
+            if (target == rightThigh)
+                return rightThighSagittalAxis;
+            if (target == leftCalf)
+                return leftCalfSagittalAxis;
+            return rightCalfSagittalAxis;
+        }
+
         private static void AddRotation(Transform target, Quaternion baseline, Vector3 axis, float degrees, float maximum)
         {
             target.localRotation = baseline * Quaternion.AngleAxis(
                 Mathf.Clamp(degrees, -maximum, maximum), axis);
+        }
+        private void AddOverlayRotation(
+            Transform target,
+            Quaternion baseline,
+            ProceduralHumanoidLocalAxis localAxis,
+            float degrees,
+            float maximum,
+            bool useSemanticAxis)
+        {
+            var clampedDegrees = Mathf.Clamp(degrees, -maximum, maximum);
+            var axis = EffectiveAxis(target, localAxis, useSemanticAxis);
+            if (!useSemanticAxis)
+            {
+                target.localRotation = target.localRotation * Quaternion.AngleAxis(clampedDegrees, axis);
+                return;
+            }
+
+            var liveBaseDelta = Quaternion.Inverse(baseline) * target.localRotation;
+            target.localRotation = baseline * Quaternion.AngleAxis(clampedDegrees, axis) * liveBaseDelta;
         }
 
         private static bool IsFinite(float value)
         {
             return !float.IsNaN(value) && !float.IsInfinity(value);
         }
+
+        private static bool IsFinite(Vector3 value)
+        {
+            return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
+        }
+
+        private static bool IsFinite(Quaternion value)
+        {
+            return IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z) && IsFinite(value.w);
+        }
+
+        private bool IsBloodKnightTuning() { return object.ReferenceEquals(tuning, ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable); }
+        private bool UsesBloodKnightSagittalPlane => usesCharacterSagittalPlane && IsBloodKnightTuning();
+
+        private static float Finite01(float value) { return IsFinite(value) ? Mathf.Clamp01(value) : 0f; }
+        private static float Signed(float value) { return !IsFinite(value) || value == 0f ? 0f : value < 0f ? -1f : 1f; }
+        private static ProceduralHumanoidAttackStage ClampAttackStage(ProceduralHumanoidAttackStage value) { return value == ProceduralHumanoidAttackStage.Impact || value == ProceduralHumanoidAttackStage.Recovery ? value : ProceduralHumanoidAttackStage.Windup; }
     }
 }
