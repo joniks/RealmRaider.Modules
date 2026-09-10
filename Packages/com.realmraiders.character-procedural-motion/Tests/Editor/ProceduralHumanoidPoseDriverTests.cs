@@ -21,7 +21,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
             var root = CreateRig(out var bones);
             try
             {
-                var rootPose = Pose.Of(root.transform);
+                var rootPose = BonePose.Of(root.transform);
                 var baseline = Snapshot(bones);
                 var driver = new ProceduralHumanoidPoseDriver();
 
@@ -29,7 +29,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
                 Assert.That(driver.IsBound, Is.True);
                 driver.Sample(Input(attack: MotionPresentationAttack.Primary), 0.8f, 1.25f, 1f / 60f);
 
-                Assert.That(Pose.Of(root.transform), Is.EqualTo(rootPose));
+                Assert.That(BonePose.Of(root.transform), Is.EqualTo(rootPose));
                 Assert.That(AnyRotationChanged(bones, baseline), Is.True);
                 Assert.That(AllBoundsRespected(bones, baseline), Is.True);
 

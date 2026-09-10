@@ -112,7 +112,8 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
 
             Assert.That(Codes(missing), Does.Contain(MotionProfileIssueCode.MissingSourceId));
             Assert.That(Codes(unordered), Does.Contain(MotionProfileIssueCode.UnorderedSourceIds));
-            Assert.That(Codes(repeated), Does.Contain(MotionProfileIssueCode.DuplicateSourceId).And.Contain(MotionProfileIssueCode.UnorderedSourceIds));
+            Assert.That(Codes(repeated), Does.Contain(MotionProfileIssueCode.DuplicateSourceId));
+            Assert.That(Codes(repeated), Does.Contain(MotionProfileIssueCode.UnorderedSourceIds));
             Assert.Throws<ArgumentException>(() => CharacterMotionProfileCanonicalizer.ContentHash(repeated));
         }
 
