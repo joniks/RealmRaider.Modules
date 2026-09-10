@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "candidateId": "realmraiders.preview.infernal-courtyard-floor.mws11.v1",
+  "createdOn": "2026-09-10",
+  "creation": "original-generated-derived-from-project-owned-reference",
+  "status": "preview-import-candidate-not-approved-for-runtime",
+  "thirdPartySources": false,
+  "tileabilityVerified": false,
+  "source": {
+    "path": "ArtPreviews/MWS03-InfernalGroundMaterialCandidate/infernal-ground-albedo-rgb-candidate.png",
+    "sha256": "d9a7e01eb03e926083234a64a772b95a85192d1902183c00b9f14f7303e7a0db",
+    "dimensions": [1024, 1024],
+    "colorFormat": "RGB",
+    "role": "sole project-owned Infernal visual direction and image-generation reference"
+  },
+  "albedoCreation": {
+    "tool": "OpenAI built-in image generation",
+    "inputRole": "sole visual source/reference",
+    "operation": "generated original derived candidate, then deterministically resized to 1024x1024 PNG with sips -z 1024 1024",
+    "prompt": "Use case: stylized-concept\\nAsset type: original 1024-square RGB tileable Infernal courtyard-floor albedo candidate for a mobile fantasy game.\\nInput images: Image 1 is the sole visual source/reference for the project-owned Infernal charcoal-and-ember direction.\\nPrimary request: derive a distinct forged Infernal courtyard floor from the reference: broad cooled basalt and ash slabs, sparse subdued ember fissures, calm enough behind characters, and visually distinct from a route or boundary.\\nScene/backdrop: exact orthographic top-down full square ground surface only.\\nStyle/medium: clean stylized mobile-game albedo; broad low-frequency forms; no photographic micro-noise.\\nComposition/framing: distribute interlocking broad slabs evenly across the whole square; balance all outer edges to suggest repeat continuity; no central emblem, radial design, directional flow, or focal slab.\\nLighting/mood: flat diffuse albedo only; no directional light, cast shadows, ambient occlusion, bloom, glow, or baked depth.\\nColor palette: charcoal black and graphite basalt with restrained, sparse deep ember orange-red in fine fissures.\\nMaterials/textures: matte cooled volcanic stone with subtle ash variation; fissures must be thin and controlled.\\nConstraints: no props, characters, structures, gates, weapons, lava pools, roots, UI, labels, text, watermarks, logos, symbols, normal-map colors, or third-party visual motifs. Keep it as a ground-color albedo candidate only, not a runtime claim."
+  },
+  "normalCreation": {
+    "toolPath": "Tools/surface_maps/derive_normal_map.py",
+    "toolVersion": "1.0.0",
+    "algorithm": "wrapped-edge luminance central differences encoded as normalized RGB tangent-space normals",
+    "strength": 0.3,
+    "command": "python3 Tools/surface_maps/derive_normal_map.py ArtPreviews/MWS11-InfernalCourtyardFloor/infernal-courtyard-floor-albedo-rgb-candidate.png ArtPreviews/MWS11-InfernalCourtyardFloor/infernal-courtyard-floor-mobile-normal-rgb-candidate.png --strength 0.30 --repeat-grid-output ArtPreviews/MWS11-InfernalCourtyardFloor/infernal-courtyard-floor-mobile-normal-2x2-repeat-evidence.png"
+  },
+  "repeatEvidence": {
+    "albedoCommand": "PYTHONPATH=Tools/surface_maps python3 -c 'from derive_normal_map import read_png, repeat_grid, write_rgb_png; p=\"ArtPreviews/MWS11-InfernalCourtyardFloor/infernal-courtyard-floor-albedo-rgb-candidate.png\"; w,h,rgb=read_png(p); gw,gh,grid=repeat_grid(w,h,rgb); write_rgb_png(\"ArtPreviews/MWS11-InfernalCourtyardFloor/infernal-courtyard-floor-albedo-2x2-repeat-evidence.png\",gw,gh,grid)'",
+    "inspectedAtFullFrame": true,
+    "result": "The exact 2x2 grid shows no hard center-cross or outer-edge seam; repeating broad slab shapes and ember fissures remain visible periodicity and require material-scale/on-device review."
+  },
+  "outputs": [
+    {
+      "file": "infernal-courtyard-floor-albedo-rgb-candidate.png",
+      "role": "albedo",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "sha256": "666ce002ccf7dc577264eef1062e0d100fab2cb5195058398186427e2269a52c"
+    },
+    {
+      "file": "infernal-courtyard-floor-albedo-2x2-repeat-evidence.png",
+      "role": "exact-2x2-albedo-repeat-evidence",
+      "dimensions": [2048, 2048],
+      "colorFormat": "RGB",
+      "sha256": "f19a16aa482fb4888f081f0dd7b649b98407a5ce4af34b9da19444ec6952a5b8"
+    },
+    {
+      "file": "infernal-courtyard-floor-mobile-normal-rgb-candidate.png",
+      "role": "restrained-tangent-space-normal-map-candidate",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "sha256": "731339751ae4c004379cbba1c424e87efc33f390e9ef5708071b5e1076bc46f7"
+    },
+    {
+      "file": "infernal-courtyard-floor-mobile-normal-2x2-repeat-evidence.png",
+      "role": "exact-2x2-normal-repeat-evidence",
+      "dimensions": [2048, 2048],
+      "colorFormat": "RGB",
+      "sha256": "9fe24deb38cc1366706cca593ff16fb53ec44a6a409a2f808546cf6a48afb2ea"
+    }
+  ],
+  "reviewRequired": [
+    "Unity normal-map import orientation validation",
+    "material scale and sRGB/linear import validation",
+    "mobile compression and texture-memory review",
+    "on-device lighting, readability behind characters, and periodicity review"
+  ],
+  "nonGoals": [
+    "runtime installation or material integration",
+    "route or boundary replacement",
+    "emission, height, roughness, or metallic maps",
+    "third-party source intake",
+    "final-art approval or gameplay authority"
+  ]
+}
