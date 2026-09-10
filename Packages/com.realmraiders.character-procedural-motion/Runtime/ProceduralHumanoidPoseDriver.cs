@@ -36,8 +36,15 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
         private Vector3 rightThighScaleBaseline;
         private Vector3 leftCalfScaleBaseline;
         private Vector3 rightCalfScaleBaseline;
+        private readonly ProceduralHumanoidMotionTuning tuning;
 
         public bool IsBound => visualRoot != null;
+        public ProceduralHumanoidMotionTuning Tuning => tuning;
+
+        public ProceduralHumanoidPoseDriver(ProceduralHumanoidMotionTuning tuning = null)
+        {
+            this.tuning = tuning ?? ProceduralHumanoidMotionTuning.CompatibilityDefault;
+        }
 
         /// <summary>Restores any prior binding before attempting a new exact local bind.</summary>
         public bool Bind(Transform suppliedVisualRoot, HumanoidBoneNameMap names)
@@ -97,7 +104,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             var speed = IsFinite(normalizedLocomotionSpeed) ? Mathf.Clamp01(normalizedLocomotionSpeed) : 0f;
             var clock = IsFinite(presentationClock) ? presentationClock : 0f;
             var safeDelta = IsFinite(deltaTime) ? Mathf.Clamp(deltaTime, 0f, 0.1f) : 0f;
-            var swing = Mathf.Sin((clock + safeDelta) * 6f);
+            var swing = Mathf.Sin((clock + safeDelta) * tuning.SwingCadenceRadiansPerSecond);
 
             switch (CharacterMotionPresentationResolver.Resolve(input))
             {
@@ -201,64 +208,64 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
 
         private void ApplyIdle(float swing)
         {
-            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.forward, 2f * swing);
-            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.forward, -2f * swing);
+            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.forward, tuning.IdleArmDegrees * swing);
+            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.forward, -tuning.IdleArmDegrees * swing);
         }
 
         private void ApplyLocomotion(float swing, float speed)
         {
-            var arm = 22f * speed * swing;
-            var thigh = 18f * speed * swing;
+            var arm = tuning.Locomotion.UpperArmDegrees * speed * swing;
+            var thigh = tuning.Locomotion.ThighDegrees * speed * swing;
+            var calf = tuning.Locomotion.CalfDegrees * speed * swing;
             AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.right, arm);
             AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.right, -arm);
             AddRotation(leftThigh, leftThighBaseline, Vector3.right, -thigh);
             AddRotation(rightThigh, rightThighBaseline, Vector3.right, thigh);
-            AddRotation(leftCalf, leftCalfBaseline, Vector3.right, 0.35f * thigh);
-            AddRotation(rightCalf, rightCalfBaseline, Vector3.right, -0.35f * thigh);
+            AddRotation(leftCalf, leftCalfBaseline, Vector3.right, calf);
+            AddRotation(rightCalf, rightCalfBaseline, Vector3.right, -calf);
         }
 
         private void ApplyJumpTakeoff()
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, -12f);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, -10f);
-            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, 8f);
+            ApplyPose(tuning.JumpTakeoff);
         }
 
         private void ApplyJumpFall()
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, 16f);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, 8f);
+            ApplyPose(tuning.JumpFall);
         }
 
         private void ApplyJumpLand()
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, -6f);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, -16f);
-            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, 18f);
+            ApplyPose(tuning.JumpLand);
         }
 
         private void ApplyPrimaryAttack()
         {
-            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.right, -28f);
-            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.right, 8f);
+            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.right, tuning.PrimaryWeaponArmDegrees);
+            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.right, tuning.PrimarySupportArmDegrees);
         }
 
         private void ApplyAbilityAttack()
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, -22f);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, 8f);
+            ApplyPose(tuning.AbilityAttack);
         }
 
         private void ApplyHit()
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, 10f);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, -6f);
+            ApplyPose(tuning.Hit);
         }
 
         private void ApplyDeathSettle()
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, 12f);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, -8f);
+            ApplyPose(tuning.Death);
+        }
+
+        private void ApplyPose(ProceduralHumanoidLimbPose pose)
+        {
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees);
+            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, pose.ThighDegrees);
+            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, pose.CalfDegrees);
         }
 
         private static void ApplyPair(
