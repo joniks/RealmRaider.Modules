@@ -66,7 +66,7 @@ namespace RealmRaiders.Modules.CharacterMotionProfiles.Tests
                 LargeCreatureMotionReadinessIssue.MissingAttackClip));
             Assert.That(result.Issues, Does.Contain(
                 LargeCreatureMotionReadinessIssue.MissingDeathClip));
-            Assert.That(result.Issues, Does.Not.Contain(
+            Assert.That(result.Issues, Has.No.Member(
                 LargeCreatureMotionReadinessIssue.BoundedHitFallbackNotAvailable));
         }
 
