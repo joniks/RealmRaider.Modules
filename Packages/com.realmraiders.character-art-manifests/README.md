@@ -47,6 +47,16 @@ Measurements at a manifest limit pass; negative counts, missing or duplicate LOD
 
 Structural input failures return no partial report. A validly identified but noncompliant pair remains in the report with all of its evaluator issues, so batch totals cannot hide failed intake checks. Callers must provide every provider and item directly; the batch builder performs no discovery or art inspection.
 
+## Offline archive inventory helper
+
+`Tools/archive_intake.py` is an offline developer helper, separate from the no-filesystem runtime assembly. It accepts one explicit local archive plus one explicit local archive-reader executable. It only asks that reader for member listings, computes byte size and lowercase SHA-256, and writes compact canonical JSON to stdout. It never downloads, searches, extracts or executes archive contents.
+
+The helper fails closed on unreadable formats, source/reader links, archive links, absolute or traversal paths, and duplicate normalized paths. `licenseReadmeCandidates` are only names that need human review; they never imply licence approval. When the user supplies the selected archive, run:
+
+```sh
+python3 Packages/com.realmraiders.character-art-manifests/Tools/archive_intake.py --reader /usr/bin/bsdtar "Treant Package.7z"
+```
+
 ## Explicit limits
 
 - No reflection, automatic discovery, global registry, singleton, filesystem/network access, timestamps, random values, environment access, or source acquisition.
