@@ -176,8 +176,15 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
             Assert.That(compatibility.Locomotion.UpperArmDegrees, Is.EqualTo(22f));
             Assert.That(compatibility.Locomotion.ThighDegrees, Is.EqualTo(18f));
             Assert.That(compatibility.Locomotion.CalfDegrees, Is.EqualTo(6.3f));
+            Assert.That(compatibility.Locomotion.UpperArmAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Right));
+            Assert.That(compatibility.AsymmetricJumpTakeoff.LeftThighDegrees, Is.EqualTo(-10f));
+            Assert.That(compatibility.AsymmetricJumpTakeoff.RightThighDegrees, Is.EqualTo(-10f));
             Assert.That(bloodKnight.Locomotion.UpperArmDegrees, Is.GreaterThan(compatibility.Locomotion.UpperArmDegrees));
             Assert.That(bloodKnight.Locomotion.ThighDegrees, Is.GreaterThan(compatibility.Locomotion.ThighDegrees));
+            Assert.That(bloodKnight.Locomotion.UpperArmAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Forward));
+            Assert.That(bloodKnight.Locomotion.ThighAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Forward));
+            Assert.That(bloodKnight.AsymmetricJumpTakeoff.LeftThighDegrees, Is.EqualTo(-22f));
+            Assert.That(bloodKnight.AsymmetricJumpTakeoff.RightThighDegrees, Is.EqualTo(12f));
             Assert.That(Math.Abs(bloodKnight.PrimaryWeaponArmDegrees), Is.GreaterThan(Math.Abs(compatibility.PrimaryWeaponArmDegrees)));
             Assert.That(Math.Abs(bloodKnight.JumpLand.ThighDegrees), Is.GreaterThan(Math.Abs(compatibility.JumpLand.ThighDegrees)));
         }
@@ -203,6 +210,74 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
             Assert.That(fast.SwingCadenceRadiansPerSecond, Is.EqualTo(ProceduralHumanoidMotionTuning.MaxSwingCadenceRadiansPerSecond));
             Assert.That(fast.IdleArmDegrees, Is.EqualTo(-ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees));
             Assert.That(fast.PrimaryWeaponArmDegrees, Is.EqualTo(-ProceduralHumanoidPoseDriver.MaxAdditiveAngleDegrees));
+            var invalidAxisPose = new ProceduralHumanoidLimbPose(1f, 2f, 3f, (ProceduralHumanoidLocalAxis)99, (ProceduralHumanoidLocalAxis)(-1), ProceduralHumanoidLocalAxis.Up);
+            Assert.That(invalidAxisPose.UpperArmAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Right));
+            Assert.That(invalidAxisPose.ThighAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Right));
+            Assert.That(invalidAxisPose.CalfAxis, Is.EqualTo(ProceduralHumanoidLocalAxis.Up));
+        }
+
+        [Test]
+        public void CompatibilityDefault_LocomotionRetainsLegacyRightAxisAngles()
+        {
+            var root = CreateRig(out var bones);
+            try
+            {
+                var baseline = Snapshot(bones);
+                var driver = new ProceduralHumanoidPoseDriver();
+                Assert.That(driver.Bind(root.transform, Bip01Map()), Is.True);
+                driver.Sample(Input(isLocomoting: true), 1f, 0.2f, 1f / 60f);
+
+                var swing = Mathf.Sin((0.2f + 1f / 60f) * 6f);
+                AssertLocalRotation(bones[0], baseline[0], Vector3.right, 22f * swing);
+                AssertLocalRotation(bones[1], baseline[1], Vector3.right, -22f * swing);
+                AssertLocalRotation(bones[2], baseline[2], Vector3.right, -18f * swing);
+                AssertLocalRotation(bones[3], baseline[3], Vector3.right, 18f * swing);
+                AssertLocalRotation(bones[4], baseline[4], Vector3.right, 6.3f * swing);
+                AssertLocalRotation(bones[5], baseline[5], Vector3.right, -6.3f * swing);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void BloodKnight_LocomotionUsesForwardCounterSwingAndAsymmetricForwardTakeoff()
+        {
+            var root = CreateRig(out var bones);
+            try
+            {
+                var rootPose = BonePose.Of(root.transform);
+                var baseline = Snapshot(bones);
+                var driver = new ProceduralHumanoidPoseDriver(ProceduralHumanoidMotionTuning.BloodKnightDeviceReadable);
+                Assert.That(driver.Bind(root.transform, Bip01Map()), Is.True);
+
+                driver.Sample(Input(isLocomoting: true), 1f, 0.2f, 1f / 60f);
+                var swing = Mathf.Sin((0.2f + 1f / 60f) * 7.5f);
+                AssertLocalRotation(bones[0], baseline[0], Vector3.forward, 28f * swing);
+                AssertLocalRotation(bones[1], baseline[1], Vector3.forward, -28f * swing);
+                AssertLocalRotation(bones[2], baseline[2], Vector3.forward, -25f * swing);
+                AssertLocalRotation(bones[3], baseline[3], Vector3.forward, 25f * swing);
+                AssertLocalRotation(bones[4], baseline[4], Vector3.forward, 13f * swing);
+                AssertLocalRotation(bones[5], baseline[5], Vector3.forward, -13f * swing);
+
+                driver.Sample(Input(jumpPhase: MotionPresentationJumpPhase.Takeoff), 0f, 0f, 0f);
+                AssertLocalRotation(bones[0], baseline[0], Vector3.forward, -18f);
+                AssertLocalRotation(bones[1], baseline[1], Vector3.forward, -18f);
+                AssertLocalRotation(bones[2], baseline[2], Vector3.forward, -22f);
+                AssertLocalRotation(bones[3], baseline[3], Vector3.forward, 12f);
+                AssertLocalRotation(bones[4], baseline[4], Vector3.forward, 20f);
+                AssertLocalRotation(bones[5], baseline[5], Vector3.forward, -10f);
+                Assert.That(BonePose.Of(root.transform), Is.EqualTo(rootPose));
+                Assert.That(AllBoundsRespected(bones, baseline), Is.True);
+
+                driver.Clear();
+                Assert.That(Snapshot(bones), Is.EqualTo(baseline));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
         }
 
         [Test]
@@ -247,6 +322,7 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
         {
             Assert.That(typeof(HumanoidBoneNameMap).GetProperties(BindingFlags.Instance | BindingFlags.Public).All(property => !property.CanWrite), Is.True);
             Assert.That(typeof(ProceduralHumanoidLimbPose).GetProperties(BindingFlags.Instance | BindingFlags.Public).All(property => !property.CanWrite), Is.True);
+            Assert.That(typeof(ProceduralHumanoidTakeoffPose).GetProperties(BindingFlags.Instance | BindingFlags.Public).All(property => !property.CanWrite), Is.True);
             Assert.That(typeof(ProceduralHumanoidMotionTuning).GetProperties(BindingFlags.Instance | BindingFlags.Public).All(property => !property.CanWrite), Is.True);
             var dependencies = typeof(ProceduralHumanoidPoseDriver).Assembly.GetReferencedAssemblies().Select(assembly => assembly.Name).ToArray();
             Assert.That(dependencies, Has.Member("RealmRaiders.CharacterMotionProfiles"));
@@ -322,6 +398,12 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion.Tests
             for (var index = 0; index < bones.Length; index++)
                 total += Quaternion.Angle(bones[index].localRotation, baseline[index].Rotation);
             return total;
+        }
+
+        private static void AssertLocalRotation(Transform bone, BonePose baseline, Vector3 axis, float degrees)
+        {
+            var expected = baseline.Rotation * Quaternion.AngleAxis(degrees, axis);
+            Assert.That(Quaternion.Angle(bone.localRotation, expected), Is.LessThan(0.001f));
         }
 
         private readonly struct BonePose : IEquatable<BonePose>

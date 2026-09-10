@@ -217,17 +217,22 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
             var arm = tuning.Locomotion.UpperArmDegrees * speed * swing;
             var thigh = tuning.Locomotion.ThighDegrees * speed * swing;
             var calf = tuning.Locomotion.CalfDegrees * speed * swing;
-            AddRotation(leftUpperArm, leftUpperArmBaseline, Vector3.right, arm);
-            AddRotation(rightUpperArm, rightUpperArmBaseline, Vector3.right, -arm);
-            AddRotation(leftThigh, leftThighBaseline, Vector3.right, -thigh);
-            AddRotation(rightThigh, rightThighBaseline, Vector3.right, thigh);
-            AddRotation(leftCalf, leftCalfBaseline, Vector3.right, calf);
-            AddRotation(rightCalf, rightCalfBaseline, Vector3.right, -calf);
+            AddRotation(leftUpperArm, leftUpperArmBaseline, Axis(tuning.Locomotion.UpperArmAxis), arm);
+            AddRotation(rightUpperArm, rightUpperArmBaseline, Axis(tuning.Locomotion.UpperArmAxis), -arm);
+            AddRotation(leftThigh, leftThighBaseline, Axis(tuning.Locomotion.ThighAxis), -thigh);
+            AddRotation(rightThigh, rightThighBaseline, Axis(tuning.Locomotion.ThighAxis), thigh);
+            AddRotation(leftCalf, leftCalfBaseline, Axis(tuning.Locomotion.CalfAxis), calf);
+            AddRotation(rightCalf, rightCalfBaseline, Axis(tuning.Locomotion.CalfAxis), -calf);
         }
 
         private void ApplyJumpTakeoff()
         {
-            ApplyPose(tuning.JumpTakeoff);
+            var pose = tuning.AsymmetricJumpTakeoff;
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees, pose.UpperArmAxis);
+            AddRotation(leftThigh, leftThighBaseline, Axis(pose.LeftThighAxis), pose.LeftThighDegrees);
+            AddRotation(rightThigh, rightThighBaseline, Axis(pose.RightThighAxis), pose.RightThighDegrees);
+            AddRotation(leftCalf, leftCalfBaseline, Axis(pose.LeftCalfAxis), pose.LeftCalfDegrees);
+            AddRotation(rightCalf, rightCalfBaseline, Axis(pose.RightCalfAxis), pose.RightCalfDegrees);
         }
 
         private void ApplyJumpFall()
@@ -263,16 +268,35 @@ namespace RealmRaiders.Modules.CharacterProceduralMotion
 
         private void ApplyPose(ProceduralHumanoidLimbPose pose)
         {
-            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees);
-            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, pose.ThighDegrees);
-            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, pose.CalfDegrees);
+            ApplyPair(leftUpperArm, leftUpperArmBaseline, rightUpperArm, rightUpperArmBaseline, pose.UpperArmDegrees, pose.UpperArmAxis);
+            ApplyPair(leftThigh, leftThighBaseline, rightThigh, rightThighBaseline, pose.ThighDegrees, pose.ThighAxis);
+            ApplyPair(leftCalf, leftCalfBaseline, rightCalf, rightCalfBaseline, pose.CalfDegrees, pose.CalfAxis);
         }
 
         private static void ApplyPair(
-            Transform left, Quaternion leftBaseline, Transform right, Quaternion rightBaseline, float degrees)
+            Transform left,
+            Quaternion leftBaseline,
+            Transform right,
+            Quaternion rightBaseline,
+            float degrees,
+            ProceduralHumanoidLocalAxis axis)
         {
-            AddRotation(left, leftBaseline, Vector3.right, degrees);
-            AddRotation(right, rightBaseline, Vector3.right, degrees);
+            var vector = Axis(axis);
+            AddRotation(left, leftBaseline, vector, degrees);
+            AddRotation(right, rightBaseline, vector, degrees);
+        }
+
+        private static Vector3 Axis(ProceduralHumanoidLocalAxis axis)
+        {
+            switch (axis)
+            {
+                case ProceduralHumanoidLocalAxis.Up:
+                    return Vector3.up;
+                case ProceduralHumanoidLocalAxis.Forward:
+                    return Vector3.forward;
+                default:
+                    return Vector3.right;
+            }
         }
 
         private static void AddRotation(Transform target, Quaternion baseline, Vector3 axis, float degrees)
