@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "candidateId": "realmraiders.preview.walkable-route-normal-pair.mws12.v1",
+  "createdOn": "2026-09-10",
+  "creation": "deterministic-derived-from-project-owned-route-albedos",
+  "status": "preview-import-candidate-not-approved-for-runtime",
+  "thirdPartySources": false,
+  "sourceAssets": [
+    {
+      "path": "ArtPreviews/MWS07-WalkableSurfaceSeamHardening/sylvan-stone-path-edge-hardened-candidate.png",
+      "sha256": "c5043bfb793fa4c85ff7e6b7284ef3a1d845bd56d8c4480628cfd91d6ccc101c",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "role": "project-owned Sylvan walkable-route albedo source"
+    },
+    {
+      "path": "ArtPreviews/MWS07-WalkableSurfaceSeamHardening/infernal-basalt-path-edge-hardened-candidate.png",
+      "sha256": "c8df59807a4fe21c9a5cc27ce3f776f43f1be1a689aab0366c27fd245606da88",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "role": "project-owned Infernal walkable-route albedo source"
+    }
+  ],
+  "normalCreation": {
+    "toolPath": "Tools/surface_maps/derive_normal_map.py",
+    "toolVersion": "1.0.0",
+    "algorithm": "wrapped-edge luminance central differences encoded as normalized RGB tangent-space normals",
+    "strength": 0.2,
+    "commands": [
+      "python3 Tools/surface_maps/derive_normal_map.py ArtPreviews/MWS07-WalkableSurfaceSeamHardening/sylvan-stone-path-edge-hardened-candidate.png ArtPreviews/MWS12-WalkableRouteNormalPair/sylvan-route-mobile-normal-rgb-candidate.png --strength 0.20 --repeat-grid-output ArtPreviews/MWS12-WalkableRouteNormalPair/sylvan-route-mobile-normal-2x2-repeat-evidence.png",
+      "python3 Tools/surface_maps/derive_normal_map.py ArtPreviews/MWS07-WalkableSurfaceSeamHardening/infernal-basalt-path-edge-hardened-candidate.png ArtPreviews/MWS12-WalkableRouteNormalPair/infernal-route-mobile-normal-rgb-candidate.png --strength 0.20 --repeat-grid-output ArtPreviews/MWS12-WalkableRouteNormalPair/infernal-route-mobile-normal-2x2-repeat-evidence.png"
+    ]
+  },
+  "outputs": [
+    {
+      "file": "sylvan-route-mobile-normal-rgb-candidate.png",
+      "source": "sylvan-stone-path-edge-hardened-candidate.png",
+      "role": "restrained-tangent-space-normal-map-candidate",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "sha256": "aec5888a187057ba19b5a41c98c79100719f01a50aec8c0a7eeb25d8ea514dae"
+    },
+    {
+      "file": "sylvan-route-mobile-normal-2x2-repeat-evidence.png",
+      "source": "sylvan-route-mobile-normal-rgb-candidate.png",
+      "role": "exact-2x2-normal-repeat-evidence",
+      "dimensions": [2048, 2048],
+      "colorFormat": "RGB",
+      "sha256": "61f2f961f1a82ecd2577cdf73a0c7ef140327f7adce1a9481fe32e57a17483ad"
+    },
+    {
+      "file": "infernal-route-mobile-normal-rgb-candidate.png",
+      "source": "infernal-basalt-path-edge-hardened-candidate.png",
+      "role": "restrained-tangent-space-normal-map-candidate",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "sha256": "34a99a389b7ffa28b37b81e7b02460a5af7646358726b27d347280bcc23aa816"
+    },
+    {
+      "file": "infernal-route-mobile-normal-2x2-repeat-evidence.png",
+      "source": "infernal-route-mobile-normal-rgb-candidate.png",
+      "role": "exact-2x2-normal-repeat-evidence",
+      "dimensions": [2048, 2048],
+      "colorFormat": "RGB",
+      "sha256": "577dd7a623bd9ca1f43345fec921f61a33a3d4da95470c2b0fb818a1175d4955"
+    }
+  ],
+  "inspection": {
+    "allFourOutputsInspectedAtFullFrame": true,
+    "result": "At strength 0.20, both candidates retain restrained route relief without exaggerated painted-shadow geometry. Exact 2x2 evidence has no hard center cross. Source-derived fine stone detail and repeated route pattern remain visible periodicity."
+  },
+  "reviewRequired": [
+    "Unity normal-map import orientation validation",
+    "linear normal-map import and mobile compression validation",
+    "material scale and on-device lighting/readability review",
+    "route tiling periodicity review in the named future Core lighting pass"
+  ],
+  "nonGoals": [
+    "Unity material or runtime integration",
+    "albedo or source-tool modification",
+    "new height, roughness, metallic, or emission maps",
+    "third-party source intake",
+    "final-art approval"
+  ]
+}
