@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "candidateId": "realmraiders.preview.sylvan-living-root-mobile-normal.mws09.v1",
+  "createdOn": "2026-09-10",
+  "status": "preview-import-candidate-not-approved-for-runtime",
+  "thirdPartySources": false,
+  "source": {
+    "path": "ArtPreviews/MWS08-RealmBoundarySeamHardening/sylvan-living-root-boundary-edge-hardened-candidate.png",
+    "sha256": "f0a79e13023c4191dd4e9405647de07db5fdc9a3cb21d340c08ba4a54c3aaba8",
+    "dimensions": [1024, 1024],
+    "colorFormat": "RGB"
+  },
+  "tool": {
+    "path": "Tools/surface_maps/derive_normal_map.py",
+    "version": "1.0.0",
+    "algorithm": "wrapped-edge luminance central differences encoded as normalized RGB tangent-space normals",
+    "strength": 0.5,
+    "command": "python3 Tools/surface_maps/derive_normal_map.py ArtPreviews/MWS08-RealmBoundarySeamHardening/sylvan-living-root-boundary-edge-hardened-candidate.png ArtPreviews/MWS09-SylvanLivingRootMobileMaps/sylvan-living-root-mobile-normal-rgb-candidate.png --strength 0.50 --repeat-grid-output ArtPreviews/MWS09-SylvanLivingRootMobileMaps/sylvan-living-root-mobile-normal-2x2-repeat-evidence.png"
+  },
+  "outputs": [
+    {
+      "file": "sylvan-living-root-mobile-normal-rgb-candidate.png",
+      "role": "tangent-space-normal-map-candidate",
+      "dimensions": [1024, 1024],
+      "colorFormat": "RGB",
+      "sha256": "27828c57fac349a26d73bac44497804296248131d8880a9289c7bad607312122"
+    },
+    {
+      "file": "sylvan-living-root-mobile-normal-2x2-repeat-evidence.png",
+      "role": "exact-2x2-repeat-evidence",
+      "dimensions": [2048, 2048],
+      "colorFormat": "RGB",
+      "sha256": "be8fb338e10a43f1f91e3702ea8cf582e2da5fb564ccf6e68c70af7f92b63d1b"
+    }
+  ],
+  "reviewRequired": [
+    "Unity normal-map import orientation validation",
+    "material-scale and mobile-compression review",
+    "on-device lighting response review"
+  ],
+  "nonGoals": [
+    "albedo modification",
+    "height or displacement map",
+    "runtime material integration",
+    "gameplay or collider authority"
+  ]
+}
