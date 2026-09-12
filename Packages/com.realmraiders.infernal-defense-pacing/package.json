@@ -1,0 +1,14 @@
+{
+  "name": "com.realmraiders.infernal-defense-pacing",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Infernal Defense Pacing",
+  "description": "Explicit no-engine pacing facts for Infernal starter defense layouts.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-defense-layouts": "0.1.0",
+    "com.realmraiders.realm-layout-contracts": "0.1.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

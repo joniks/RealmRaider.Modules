@@ -1,0 +1,17 @@
+{
+  "name": "RealmRaiders.InfernalDefensePacing",
+  "rootNamespace": "RealmRaiders.Modules.InfernalDefensePacing",
+  "references": [
+    "RealmRaiders.InfernalDefenseLayouts",
+    "RealmRaiders.RealmLayoutContracts"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}
