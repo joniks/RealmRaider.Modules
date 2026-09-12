@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.InfernalDefenseBeatReadability",
+  "rootNamespace": "RealmRaiders.Modules.InfernalDefenseBeatReadability",
+  "references": [
+    "RealmRaiders.InfernalDefensePacing"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

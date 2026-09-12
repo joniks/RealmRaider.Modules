@@ -1,0 +1,13 @@
+{
+  "name": "com.realmraiders.infernal-defense-beat-readability",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Infernal Defense Beat Readability",
+  "description": "Immutable no-engine player-readable facts for exact Infernal defense pacing beats.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-defense-pacing": "0.1.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}
