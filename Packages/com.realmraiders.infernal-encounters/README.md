@@ -33,3 +33,11 @@ exact two Hellhounds, Infernal Brute, Infernal Heart, and Brute-only Heart gate.
 It remains an adapter-neutral recipe: Core alone maps these coordinates to its
 floor, creates entities or presentation, applies the hazard configuration, and
 owns AI, rewards, timing, and objective behavior.
+
+## Exact lookup and validation
+
+`InfernalEntTrialSpatialRecipeEvidence` provides an ordinal `compositionId` lookup
+over the cached spatial recipes and fail-closed validation evidence for a supplied
+recipe. Validation checks its pacing ID, Guardian Ent hero, finite in-lane
+placements, ordered one-to-one beat/content mapping, and required hazard cardinality
+and bypass facts. It neither chooses a variant nor creates or changes gameplay.
