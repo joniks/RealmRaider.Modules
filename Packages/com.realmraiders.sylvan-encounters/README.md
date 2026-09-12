@@ -20,3 +20,13 @@ The Baseline Wolf Scout deliberately uses `(-1.5, 1.7)`, rather than the old
 bootstrap offset `(-2, 3)`. The old center point lies outside the 3.25m node radius.
 The new location leaves the scaled wolf capsule and its 0.2m clearance within that
 same boundary; Core should use this authored offset when it performs the integration.
+
+## Compact presentation facts
+
+`StarterSylvanRaidPresentationCatalogue` preserves the exact `Baseline`,
+`WolfPressure`, `SentinelEscort` composition order with canonical display names and
+compact all-caps tactical summaries. A summary states only the factual Wolf count,
+the Wolf node that carries the named pressure, and exactly one Ent; Moonwell pressure
+appears only for `WolfPressure`. Its ordinal lookup and validation evidence do not
+select a raid, create UI, or add gameplay authority. Core deliberately decides if it
+shows a returned fact.
