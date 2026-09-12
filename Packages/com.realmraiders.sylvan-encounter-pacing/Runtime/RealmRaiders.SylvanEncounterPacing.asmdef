@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.SylvanEncounterPacing",
+  "rootNamespace": "RealmRaiders.Modules.SylvanEncounterPacing",
+  "references": [
+    "RealmRaiders.StarterRealmLayouts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

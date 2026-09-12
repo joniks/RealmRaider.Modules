@@ -1,0 +1,13 @@
+{
+  "name": "com.realmraiders.sylvan-encounter-pacing",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Sylvan Encounter Pacing",
+  "description": "Explicit no-engine pacing facts for materialized Sylvan starter layouts.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.starter-realm-layouts": "0.2.1"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

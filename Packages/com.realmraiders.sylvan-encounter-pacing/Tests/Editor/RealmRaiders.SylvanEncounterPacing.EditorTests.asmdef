@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.SylvanEncounterPacing.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.SylvanEncounterPacing.Tests",
+  "references": [
+    "RealmRaiders.SylvanEncounterPacing"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
