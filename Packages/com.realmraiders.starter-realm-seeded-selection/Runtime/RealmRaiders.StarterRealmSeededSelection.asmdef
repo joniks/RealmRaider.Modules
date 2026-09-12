@@ -1,0 +1,13 @@
+{
+  "name": "RealmRaiders.StarterRealmSeededSelection",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmSeededSelection",
+  "references": [
+    "RealmRaiders.SeededLayoutSelection",
+    "RealmRaiders.StarterRealmLayouts",
+    "RealmRaiders.InfernalDefenseLayouts",
+    "RealmRaiders.RealmLayoutContracts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
