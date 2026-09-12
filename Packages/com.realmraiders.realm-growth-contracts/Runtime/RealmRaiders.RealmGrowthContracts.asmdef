@@ -1,0 +1,7 @@
+{
+  "name": "RealmRaiders.RealmGrowthContracts",
+  "rootNamespace": "RealmRaiders.Modules.RealmGrowthContracts",
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

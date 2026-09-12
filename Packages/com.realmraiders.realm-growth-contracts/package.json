@@ -1,0 +1,10 @@
+{
+  "name": "com.realmraiders.realm-growth-contracts",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Realm Growth Contracts",
+  "description": "Caller-supplied no-engine realm growth tier validation and resolution contracts.",
+  "unity": "6000.6",
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

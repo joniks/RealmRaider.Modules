@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.RealmGrowthContracts.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.RealmGrowthContracts.Tests",
+  "references": [
+    "RealmRaiders.RealmGrowthContracts"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
