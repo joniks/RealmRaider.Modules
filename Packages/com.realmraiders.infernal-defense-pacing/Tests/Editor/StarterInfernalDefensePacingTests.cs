@@ -571,7 +571,7 @@ namespace RealmRaiders.Modules.InfernalDefensePacing.Tests
             return copy;
         }
 
-        private sealed class PacingRecipeSnapshot
+        public sealed class PacingRecipeSnapshot
         {
             public PacingRecipeSnapshot(
                 string layoutId,
@@ -590,7 +590,7 @@ namespace RealmRaiders.Modules.InfernalDefensePacing.Tests
             public IReadOnlyList<PacingBeatSnapshot> Beats { get; }
         }
 
-        private sealed class PacingBeatSnapshot
+        public sealed class PacingBeatSnapshot
         {
             public PacingBeatSnapshot(
                 string beatId,

@@ -605,7 +605,7 @@ namespace RealmRaiders.Modules.InfernalDefenseLayouts.Tests
             return new SocketSnapshot(socketId, nodeId, x, z);
         }
 
-        private sealed class LayoutSnapshot
+        public sealed class LayoutSnapshot
         {
             public LayoutSnapshot(
                 string layoutId,
@@ -636,7 +636,7 @@ namespace RealmRaiders.Modules.InfernalDefenseLayouts.Tests
             public IReadOnlyList<SocketSnapshot> Sockets { get; }
         }
 
-        private sealed class NodeSnapshot
+        public sealed class NodeSnapshot
         {
             public NodeSnapshot(
                 string nodeId,
@@ -663,7 +663,7 @@ namespace RealmRaiders.Modules.InfernalDefenseLayouts.Tests
             public float Z { get; }
         }
 
-        private sealed class EdgeSnapshot
+        public sealed class EdgeSnapshot
         {
             public EdgeSnapshot(
                 string edgeId,
@@ -690,7 +690,7 @@ namespace RealmRaiders.Modules.InfernalDefenseLayouts.Tests
             public float FloorPathWidth { get; }
         }
 
-        private sealed class LandmarkSnapshot
+        public sealed class LandmarkSnapshot
         {
             public LandmarkSnapshot(
                 string landmarkId,
@@ -709,7 +709,7 @@ namespace RealmRaiders.Modules.InfernalDefenseLayouts.Tests
             public string NodeId { get; }
         }
 
-        private sealed class SocketSnapshot
+        public sealed class SocketSnapshot
         {
             public SocketSnapshot(
                 string socketId,

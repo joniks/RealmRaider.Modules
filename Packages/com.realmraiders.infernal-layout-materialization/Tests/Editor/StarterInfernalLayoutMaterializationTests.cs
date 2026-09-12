@@ -148,6 +148,7 @@ namespace RealmRaiders.Modules.InfernalLayoutMaterialization.Tests
                 {
                     InfernalLayoutMaterializationValidationIssue.RoleIdInvalid,
                     InfernalLayoutMaterializationValidationIssue.RoleKindInvalid,
+                    InfernalLayoutMaterializationValidationIssue.FloorTreatmentIdNotAllowed,
                     InfernalLayoutMaterializationValidationIssue.RouteWidthSourceInvalid,
                     InfernalLayoutMaterializationValidationIssue.MappingRoleCoverageInvalid
                 },
@@ -598,7 +599,7 @@ namespace RealmRaiders.Modules.InfernalLayoutMaterialization.Tests
             return copy;
         }
 
-        private sealed class RecipeSnapshot
+        public sealed class RecipeSnapshot
         {
             public RecipeSnapshot(
                 string layoutId,
@@ -621,7 +622,7 @@ namespace RealmRaiders.Modules.InfernalLayoutMaterialization.Tests
             public IReadOnlyList<MappingSnapshot> Mappings { get; }
         }
 
-        private sealed class MappingSnapshot
+        public sealed class MappingSnapshot
         {
             public MappingSnapshot(
                 string roleId,
