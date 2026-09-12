@@ -1,0 +1,11 @@
+{
+  "name": "RealmRaiders.InfernalInvaderTraversal.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.InfernalInvaderTraversal.Tests",
+  "references": [
+    "RealmRaiders.InfernalInvaderTraversal"
+  ],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": false,
+  "noEngineReferences": true
+}

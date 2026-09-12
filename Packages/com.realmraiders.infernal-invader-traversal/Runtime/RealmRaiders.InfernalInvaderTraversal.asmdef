@@ -1,0 +1,11 @@
+{
+  "name": "RealmRaiders.InfernalInvaderTraversal",
+  "rootNamespace": "RealmRaiders.Modules.InfernalInvaderTraversal",
+  "references": [
+    "RealmRaiders.InfernalDefenseLayouts",
+    "RealmRaiders.InfernalDefensePacing",
+    "RealmRaiders.RealmLayoutContracts"
+  ],
+  "autoReferenced": false,
+  "noEngineReferences": true
+}

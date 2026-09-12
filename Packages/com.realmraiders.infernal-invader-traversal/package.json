@@ -1,0 +1,12 @@
+{
+  "name": "com.realmraiders.infernal-invader-traversal",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Infernal Invader Traversal",
+  "description": "Explicit no-engine authored traversal facts for Infernal defense layouts.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-defense-layouts": "0.1.0",
+    "com.realmraiders.infernal-defense-pacing": "0.1.0",
+    "com.realmraiders.realm-layout-contracts": "0.1.0"
+  }
+}
