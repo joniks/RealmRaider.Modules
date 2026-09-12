@@ -1,0 +1,11 @@
+{
+  "name": "RealmRaiders.InfernalDefenseLayouts",
+  "rootNamespace": "RealmRaiders.Modules.InfernalDefenseLayouts",
+  "references": [
+    "RealmRaiders.RealmLayoutContracts",
+    "RealmRaiders.InfernalEncounters"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
