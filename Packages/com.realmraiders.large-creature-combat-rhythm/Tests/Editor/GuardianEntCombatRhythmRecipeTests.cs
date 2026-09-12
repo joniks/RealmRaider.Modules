@@ -29,28 +29,61 @@ namespace RealmRaiders.Modules.LargeCreatureCombatRhythm.Tests
         }
 
         [Test]
-        public void CoreSuppliedEligibleTargetCountBlocksOneAndAllowsTwoOrMore()
-        {
-            var opportunity = GuardianEntCombatRhythmRecipes.GuardianEnt.HeavyAreaOpportunity;
-            var coreSuppliedOneEligibleTarget = 1;
-            var coreSuppliedTwoEligibleTargets = 2;
-
-            Assert.That(opportunity.MinimumEligibleNearbyTargetCount, Is.EqualTo(2));
-            Assert.That(coreSuppliedOneEligibleTarget, Is.LessThan(
-                opportunity.MinimumEligibleNearbyTargetCount));
-            Assert.That(coreSuppliedTwoEligibleTargets, Is.GreaterThanOrEqualTo(
-                opportunity.MinimumEligibleNearbyTargetCount));
-        }
-
-        [Test]
-        public void AreaOpportunityUsesExistingAbilityRangeAndRecoverySemantics()
+        public void AreaOpportunityUsesExactTwoPathThresholdsAndExistingSourceSemantics()
         {
             var opportunity = GuardianEntCombatRhythmRecipes.GuardianEnt.HeavyAreaOpportunity;
 
+            Assert.That(opportunity.ImmediateAreaMinimumEligibleTargets, Is.EqualTo(2));
+            Assert.That(opportunity.SingleTargetAreaAfterConsecutiveBasicCount, Is.EqualTo(2));
+            Assert.That(opportunity.EligibleTargetSource, Is.EqualTo(
+                LargeCreatureEligibleTargetSource.ExistingExplicitBrainTargets));
             Assert.That(opportunity.EligibilityDistanceSource, Is.EqualTo(
                 LargeCreatureEligibilityDistanceSource.ExistingAreaAbilityRadius));
             Assert.That(opportunity.PunishWindowSource, Is.EqualTo(
                 LargeCreaturePunishWindowSource.ExistingAreaAbilityRecovery));
+        }
+
+        [Test]
+        public void CoreOwnedDecisionNeverOffersAreaForZeroTargets()
+        {
+            var opportunity = GuardianEntCombatRhythmRecipes.GuardianEnt.HeavyAreaOpportunity;
+
+            Assert.That(CoreMayOfferArea(opportunity, 0, 0), Is.False);
+            Assert.That(CoreMayOfferArea(opportunity, 0, 2), Is.False);
+        }
+
+        [Test]
+        public void CoreOwnedDecisionOffersAreaForOneTargetOnlyAfterTwoBasics()
+        {
+            var opportunity = GuardianEntCombatRhythmRecipes.GuardianEnt.HeavyAreaOpportunity;
+
+            Assert.That(CoreMayOfferArea(opportunity, 1, 0), Is.False);
+            Assert.That(CoreMayOfferArea(opportunity, 1, 1), Is.False);
+            Assert.That(CoreMayOfferArea(opportunity, 1, 2), Is.True);
+        }
+
+        [Test]
+        public void CoreOwnedDecisionOffersAreaImmediatelyForTwoTargets()
+        {
+            var opportunity = GuardianEntCombatRhythmRecipes.GuardianEnt.HeavyAreaOpportunity;
+
+            Assert.That(CoreMayOfferArea(opportunity, 2, 0), Is.True);
+        }
+
+        [Test]
+        public void CoreOwnedBasicCountCanResetWithoutChangingImmutableRecipe()
+        {
+            var opportunity = GuardianEntCombatRhythmRecipes.GuardianEnt.HeavyAreaOpportunity;
+            var coreOwnedConsecutiveBasicCount = 2;
+
+            Assert.That(CoreMayOfferArea(opportunity, 1, coreOwnedConsecutiveBasicCount), Is.True);
+
+            coreOwnedConsecutiveBasicCount = 0;
+
+            Assert.That(CoreMayOfferArea(opportunity, 1, coreOwnedConsecutiveBasicCount), Is.False);
+            Assert.That(typeof(HeavyAreaOpportunity).GetMethods(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .Where(method => !method.IsSpecialName), Is.Empty);
         }
 
         [Test]
@@ -102,6 +135,16 @@ namespace RealmRaiders.Modules.LargeCreatureCombatRhythm.Tests
 
             Assert.That(dependencies.Any(name => name.StartsWith("UnityEngine")), Is.False);
             Assert.That(dependencies.Any(name => name == "RealmRaiders.Runtime"), Is.False);
+        }
+
+        private static bool CoreMayOfferArea(
+            HeavyAreaOpportunity opportunity,
+            int coreSuppliedEligibleTargetCount,
+            int coreOwnedConsecutiveBasicCount)
+        {
+            return coreSuppliedEligibleTargetCount >= opportunity.ImmediateAreaMinimumEligibleTargets ||
+                coreSuppliedEligibleTargetCount == 1 &&
+                coreOwnedConsecutiveBasicCount >= opportunity.SingleTargetAreaAfterConsecutiveBasicCount;
         }
     }
 }

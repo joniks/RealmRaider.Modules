@@ -15,6 +15,11 @@ namespace RealmRaiders.Modules.LargeCreatureCombatRhythm
         ExistingAreaAbilityRadius
     }
 
+    public enum LargeCreatureEligibleTargetSource
+    {
+        ExistingExplicitBrainTargets
+    }
+
     public enum LargeCreaturePunishWindowSource
     {
         ExistingAreaAbilityRecovery
@@ -24,16 +29,24 @@ namespace RealmRaiders.Modules.LargeCreatureCombatRhythm
     public sealed class HeavyAreaOpportunity
     {
         public HeavyAreaOpportunity(
-            int minimumEligibleNearbyTargetCount,
+            int immediateAreaMinimumEligibleTargets,
+            int singleTargetAreaAfterConsecutiveBasicCount,
+            LargeCreatureEligibleTargetSource eligibleTargetSource,
             LargeCreatureEligibilityDistanceSource eligibilityDistanceSource,
             LargeCreaturePunishWindowSource punishWindowSource)
         {
-            MinimumEligibleNearbyTargetCount = minimumEligibleNearbyTargetCount;
+            ImmediateAreaMinimumEligibleTargets = immediateAreaMinimumEligibleTargets;
+            SingleTargetAreaAfterConsecutiveBasicCount = singleTargetAreaAfterConsecutiveBasicCount;
+            EligibleTargetSource = eligibleTargetSource;
             EligibilityDistanceSource = eligibilityDistanceSource;
             PunishWindowSource = punishWindowSource;
         }
 
-        public int MinimumEligibleNearbyTargetCount { get; }
+        public int ImmediateAreaMinimumEligibleTargets { get; }
+
+        public int SingleTargetAreaAfterConsecutiveBasicCount { get; }
+
+        public LargeCreatureEligibleTargetSource EligibleTargetSource { get; }
 
         public LargeCreatureEligibilityDistanceSource EligibilityDistanceSource { get; }
 
@@ -100,6 +113,8 @@ namespace RealmRaiders.Modules.LargeCreatureCombatRhythm
                 },
                 new HeavyAreaOpportunity(
                     2,
+                    2,
+                    LargeCreatureEligibleTargetSource.ExistingExplicitBrainTargets,
                     LargeCreatureEligibilityDistanceSource.ExistingAreaAbilityRadius,
                     LargeCreaturePunishWindowSource.ExistingAreaAbilityRecovery));
     }
