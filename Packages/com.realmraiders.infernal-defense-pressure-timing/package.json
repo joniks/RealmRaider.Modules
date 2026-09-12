@@ -1,0 +1,13 @@
+{
+  "name": "com.realmraiders.infernal-defense-pressure-timing",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Infernal Defense Pressure Timing",
+  "description": "Immutable no-engine timing facts for authored Infernal defense pacing recipes.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-defense-pacing": "0.1.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.InfernalDefensePressureTiming",
+  "rootNamespace": "RealmRaiders.Modules.InfernalDefensePressureTiming",
+  "references": [
+    "RealmRaiders.InfernalDefensePacing"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
