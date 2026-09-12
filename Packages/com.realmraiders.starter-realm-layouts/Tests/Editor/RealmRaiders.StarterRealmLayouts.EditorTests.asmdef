@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.StarterRealmLayouts.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmLayouts.Tests",
+  "references": [
+    "RealmRaiders.StarterRealmLayouts"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
