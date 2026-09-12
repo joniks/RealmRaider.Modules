@@ -129,6 +129,18 @@ namespace RealmRaiders.Modules.InfernalEncounters
 
         public const string InfernalBruteDefeatedGateId = "realmraiders.infernal.infernal-brute-defeated";
 
+        public const string EntryTrialHellhoundABeatId = "entry-trial.hellhound-a";
+
+        public const string EntryTrialInfernalHeartBeatId = "entry-trial.infernal-heart";
+
+        public const string RiskRouteHellhoundABeatId = "risk-route.hellhound-a";
+
+        public const string RiskRouteHellhoundBBeatId = "risk-route.hellhound-b";
+
+        public const string RiskRouteFlameChoiceBeatId = "risk-route.flame-choice";
+
+        public const string RiskRouteInfernalHeartBeatId = "risk-route.infernal-heart";
+
         public const string BruteFinaleHellhoundABeatId = "brute-finale.hellhound-a";
 
         public const string BruteFinaleHellhoundBBeatId = "brute-finale.hellhound-b";
@@ -150,7 +162,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                 new InfernalRaidPacingBeat[]
                 {
                     new InfernalRaidPacingBeat(
-                        "entry-trial.hellhound-a",
+                        EntryTrialHellhoundABeatId,
                         "Hellhound Trial",
                         InfernalRaidBeatKind.Enemy,
                         HellhoundArchetypeId,
@@ -160,7 +172,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                         2,
                         20),
                     new InfernalRaidPacingBeat(
-                        "entry-trial.infernal-heart",
+                        EntryTrialInfernalHeartBeatId,
                         "Claim the Infernal Heart",
                         InfernalRaidBeatKind.Objective,
                         InfernalHeartContentId,
@@ -182,7 +194,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                 new InfernalRaidPacingBeat[]
                 {
                     new InfernalRaidPacingBeat(
-                        "risk-route.hellhound-a",
+                        RiskRouteHellhoundABeatId,
                         "First Hellhound",
                         InfernalRaidBeatKind.Enemy,
                         HellhoundArchetypeId,
@@ -192,7 +204,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                         2,
                         18),
                     new InfernalRaidPacingBeat(
-                        "risk-route.hellhound-b",
+                        RiskRouteHellhoundBBeatId,
                         "Second Hellhound",
                         InfernalRaidBeatKind.Enemy,
                         HellhoundArchetypeId,
@@ -202,7 +214,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                         18,
                         32),
                     new InfernalRaidPacingBeat(
-                        "risk-route.flame-choice",
+                        RiskRouteFlameChoiceBeatId,
                         "Bypass the Flame",
                         InfernalRaidBeatKind.Hazard,
                         FlameTrapContentId,
@@ -212,7 +224,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                         32,
                         40),
                     new InfernalRaidPacingBeat(
-                        "risk-route.infernal-heart",
+                        RiskRouteInfernalHeartBeatId,
                         "Claim the Infernal Heart",
                         InfernalRaidBeatKind.Objective,
                         InfernalHeartContentId,

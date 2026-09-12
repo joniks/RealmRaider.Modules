@@ -18,13 +18,17 @@ not a full hostile clear, so the two Hellhounds may be bypassed. The listed seco
 are pacing windows, not runtime timers or a promise about a player's exact
 completion time.
 
-## Brute Finale spatial recipe
+## Spatial recipes
 
-`StarterInfernalEntTrialSpatialRecipes.BruteFinale` supplies the exact 14m-wide
-trial-lane facts for the same Brute Finale beat and content IDs: Guardian Ent hero,
-two Hellhounds, one Flame Trap, Infernal Brute, and Infernal Heart. It includes the
-Ent's safe center bound and the Flame bypass corridors, plus the explicit
-automatic-after-initialize and nonblocking-presentation facts.
+`StarterInfernalEntTrialSpatialRecipes.All` preserves the pacing catalogue order:
+`EntryTrial`, `RiskRoute`, then `BruteFinale`. Each recipe maps every stable pacing
+beat and content ID exactly once in that order, using the same 14m-wide trial lane
+and Guardian Ent direct-control start facts.
+
+`EntryTrial` has no Flame Trap. `RiskRoute` and `BruteFinale` each contain one
+optional, bypassable Flame Trap with left and right safe-center corridors; their
+enemy and objective points stay outside the trap radius. `BruteFinale` retains its
+exact two Hellhounds, Infernal Brute, Infernal Heart, and Brute-only Heart gate.
 
 It remains an adapter-neutral recipe: Core alone maps these coordinates to its
 floor, creates entities or presentation, applies the hazard configuration, and

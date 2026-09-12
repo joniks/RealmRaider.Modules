@@ -108,7 +108,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
     }
 
     /// <summary>
-    /// Immutable spatial facts for the Brute Finale trial. It has no authority to
+    /// Immutable spatial facts for one Infernal Ent trial. It has no authority to
     /// build a lane, instantiate an entity, configure AI, or activate a hazard.
     /// </summary>
     public sealed class InfernalEntTrialSpatialRecipe
@@ -135,6 +135,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
 
         public IReadOnlyList<InfernalEntTrialEncounterPoint> EncounterPoints { get; }
 
+        /// <summary>Optional Flame Trap placement; null when the composition has no hazard beat.</summary>
         public InfernalEntTrialHazardPoint FlameTrap { get; }
 
         private static IReadOnlyList<InfernalEntTrialEncounterPoint> Snapshot(
@@ -155,19 +156,77 @@ namespace RealmRaiders.Modules.InfernalEncounters
         }
     }
 
-    /// <summary>One explicit spatial recipe. Core must deliberately choose and materialize it.</summary>
+    /// <summary>
+    /// Explicit spatial recipes in the pacing catalogue's stable order. Core must
+    /// deliberately choose and materialize one recipe.
+    /// </summary>
     public static class StarterInfernalEntTrialSpatialRecipes
     {
+        public static InfernalEntTrialSpatialRecipe EntryTrial { get; } =
+            new InfernalEntTrialSpatialRecipe(
+                StarterInfernalRaidPacingCatalogue.EntryTrial.CompositionId,
+                7f,
+                CreateGuardianEntHero(),
+                new InfernalEntTrialEncounterPoint[]
+                {
+                    new InfernalEntTrialEncounterPoint(
+                        1,
+                        StarterInfernalRaidPacingCatalogue.EntryTrialHellhoundABeatId,
+                        StarterInfernalRaidPacingCatalogue.HellhoundArchetypeId,
+                        -3.6f,
+                        -13f),
+                    new InfernalEntTrialEncounterPoint(
+                        2,
+                        StarterInfernalRaidPacingCatalogue.EntryTrialInfernalHeartBeatId,
+                        StarterInfernalRaidPacingCatalogue.InfernalHeartContentId,
+                        0f,
+                        16f)
+                },
+                null);
+
+        public static InfernalEntTrialSpatialRecipe RiskRoute { get; } =
+            new InfernalEntTrialSpatialRecipe(
+                StarterInfernalRaidPacingCatalogue.RiskRoute.CompositionId,
+                7f,
+                CreateGuardianEntHero(),
+                new InfernalEntTrialEncounterPoint[]
+                {
+                    new InfernalEntTrialEncounterPoint(
+                        1,
+                        StarterInfernalRaidPacingCatalogue.RiskRouteHellhoundABeatId,
+                        StarterInfernalRaidPacingCatalogue.HellhoundArchetypeId,
+                        -3.6f,
+                        -13f),
+                    new InfernalEntTrialEncounterPoint(
+                        2,
+                        StarterInfernalRaidPacingCatalogue.RiskRouteHellhoundBBeatId,
+                        StarterInfernalRaidPacingCatalogue.HellhoundArchetypeId,
+                        3.6f,
+                        -7f),
+                    new InfernalEntTrialEncounterPoint(
+                        4,
+                        StarterInfernalRaidPacingCatalogue.RiskRouteInfernalHeartBeatId,
+                        StarterInfernalRaidPacingCatalogue.InfernalHeartContentId,
+                        0f,
+                        22f)
+                },
+                new InfernalEntTrialHazardPoint(
+                    3,
+                    StarterInfernalRaidPacingCatalogue.RiskRouteFlameChoiceBeatId,
+                    StarterInfernalRaidPacingCatalogue.FlameTrapContentId,
+                    0f,
+                    2f,
+                    2f,
+                    true,
+                    true,
+                    -3.5f,
+                    3.5f));
+
         public static InfernalEntTrialSpatialRecipe BruteFinale { get; } =
             new InfernalEntTrialSpatialRecipe(
                 StarterInfernalRaidPacingCatalogue.BruteFinale.CompositionId,
                 7f,
-                new InfernalEntTrialHeroPlacement(
-                    StarterInfernalRaidPacingCatalogue.GuardianEntArchetypeId,
-                    0f,
-                    -30f,
-                    1.45f,
-                    5.64f),
+                CreateGuardianEntHero(),
                 new InfernalEntTrialEncounterPoint[]
                 {
                     new InfernalEntTrialEncounterPoint(
@@ -206,5 +265,23 @@ namespace RealmRaiders.Modules.InfernalEncounters
                     true,
                     -3.5f,
                     3.5f));
+
+        public static IReadOnlyList<InfernalEntTrialSpatialRecipe> All { get; } =
+            Array.AsReadOnly(new[]
+            {
+                EntryTrial,
+                RiskRoute,
+                BruteFinale
+            });
+
+        private static InfernalEntTrialHeroPlacement CreateGuardianEntHero()
+        {
+            return new InfernalEntTrialHeroPlacement(
+                StarterInfernalRaidPacingCatalogue.GuardianEntArchetypeId,
+                0f,
+                -30f,
+                1.45f,
+                5.64f);
+        }
     }
 }
