@@ -1,0 +1,10 @@
+{
+  "name": "com.realmraiders.starter-realm-identity-record",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Starter Realm Identity Record",
+  "description": "Portable immutable starter-realm identity records with strict canonical text encoding.",
+  "unity": "6000.6",
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

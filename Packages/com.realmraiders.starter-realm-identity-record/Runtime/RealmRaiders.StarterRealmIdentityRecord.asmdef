@@ -1,0 +1,8 @@
+{
+  "name": "RealmRaiders.StarterRealmIdentityRecord",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmIdentityRecord",
+  "references": [],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

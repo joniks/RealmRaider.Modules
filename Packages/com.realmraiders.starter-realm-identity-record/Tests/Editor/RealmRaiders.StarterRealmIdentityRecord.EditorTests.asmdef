@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.StarterRealmIdentityRecord.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmIdentityRecord.Tests",
+  "references": [
+    "RealmRaiders.StarterRealmIdentityRecord"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
