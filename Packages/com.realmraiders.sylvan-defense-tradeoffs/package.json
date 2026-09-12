@@ -1,0 +1,10 @@
+{
+  "name": "com.realmraiders.sylvan-defense-tradeoffs",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Sylvan Defense Tradeoffs",
+  "description": "Explicit Sylvan roster tradeoff facts and a pure Core-facing evaluator.",
+  "unity": "6000.6",
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

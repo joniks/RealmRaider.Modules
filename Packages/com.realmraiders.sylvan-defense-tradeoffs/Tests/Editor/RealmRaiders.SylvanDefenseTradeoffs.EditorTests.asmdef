@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.SylvanDefenseTradeoffs.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.SylvanDefenseTradeoffs.Tests",
+  "references": [
+    "RealmRaiders.SylvanDefenseTradeoffs"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
