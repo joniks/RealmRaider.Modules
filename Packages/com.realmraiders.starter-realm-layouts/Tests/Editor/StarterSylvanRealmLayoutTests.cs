@@ -655,7 +655,8 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                     RealmLayoutValidationIssue.LandmarkTypeInvalid,
                     RealmLayoutValidationIssue.LandmarkNodeInvalid,
                     RealmLayoutValidationIssue.ExpansionSocketNodeInvalid,
-                    RealmLayoutValidationIssue.ExpansionSocketCoordinateInvalid
+                    RealmLayoutValidationIssue.ExpansionSocketCoordinateInvalid,
+                    RealmLayoutValidationIssue.LayoutDisconnected
                 },
                 result.Issues);
         }
