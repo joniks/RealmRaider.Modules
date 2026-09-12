@@ -1,8 +1,8 @@
 {
   "name": "com.realmraiders.large-creature-combat-rhythm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Realm Raiders Large Creature Combat Rhythm",
-  "description": "Explicit heavy-creature attack-rhythm facts for a later Core adapter.",
+  "description": "Explicit heavy-creature attack-rhythm facts and pure decision evaluation for Core adapters.",
   "unity": "6000.6",
   "author": {
     "name": "Realm Raiders"
