@@ -1,0 +1,17 @@
+{
+  "name": "RealmRaiders.InfernalLayoutMaterialization",
+  "rootNamespace": "RealmRaiders.Modules.InfernalLayoutMaterialization",
+  "references": [
+    "RealmRaiders.InfernalDefenseLayouts",
+    "RealmRaiders.RealmLayoutContracts"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

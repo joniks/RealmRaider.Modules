@@ -1,0 +1,14 @@
+{
+  "name": "com.realmraiders.infernal-layout-materialization",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Infernal Layout Materialization",
+  "description": "Explicit no-engine presentation facts for Infernal defense layout materialization.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-defense-layouts": "0.1.0",
+    "com.realmraiders.realm-layout-contracts": "0.1.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}
