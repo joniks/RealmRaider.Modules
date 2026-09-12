@@ -1,0 +1,13 @@
+{
+  "name": "RealmRaiders.InfernalDefenseBeatBundle",
+  "rootNamespace": "RealmRaiders.Modules.InfernalDefenseBeatBundle",
+  "references": [
+    "RealmRaiders.InfernalDefensePacing",
+    "RealmRaiders.InfernalDefensePacingProgression",
+    "RealmRaiders.InfernalDefensePressureTiming",
+    "RealmRaiders.InfernalDefenseBeatReadability"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

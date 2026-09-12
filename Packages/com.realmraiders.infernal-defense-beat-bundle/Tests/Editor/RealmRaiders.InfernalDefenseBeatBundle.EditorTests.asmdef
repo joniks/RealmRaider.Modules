@@ -1,0 +1,20 @@
+{
+  "name": "RealmRaiders.InfernalDefenseBeatBundle.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.InfernalDefenseBeatBundle.Tests",
+  "references": [
+    "RealmRaiders.InfernalDefenseBeatBundle",
+    "RealmRaiders.InfernalDefensePacing",
+    "RealmRaiders.InfernalDefensePacingProgression",
+    "RealmRaiders.InfernalDefensePressureTiming",
+    "RealmRaiders.InfernalDefenseBeatReadability"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

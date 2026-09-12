@@ -1,0 +1,16 @@
+{
+  "name": "com.realmraiders.infernal-defense-beat-bundle",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Infernal Defense Beat Bundle",
+  "description": "Read-only exact composition of Infernal eligibility, timing and readability facts.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-defense-pacing": "0.1.0",
+    "com.realmraiders.infernal-defense-pacing-progression": "0.1.0",
+    "com.realmraiders.infernal-defense-pressure-timing": "0.1.0",
+    "com.realmraiders.infernal-defense-beat-readability": "0.1.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}
