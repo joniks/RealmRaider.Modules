@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.LargeCreatureCombatRhythm.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.LargeCreatureCombatRhythm.Tests",
+  "references": [
+    "RealmRaiders.LargeCreatureCombatRhythm"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

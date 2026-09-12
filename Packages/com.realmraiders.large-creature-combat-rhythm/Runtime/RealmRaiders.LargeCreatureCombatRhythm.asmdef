@@ -1,0 +1,7 @@
+{
+  "name": "RealmRaiders.LargeCreatureCombatRhythm",
+  "rootNamespace": "RealmRaiders.Modules.LargeCreatureCombatRhythm",
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
