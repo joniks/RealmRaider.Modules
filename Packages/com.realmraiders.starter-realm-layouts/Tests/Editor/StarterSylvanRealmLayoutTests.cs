@@ -24,13 +24,16 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
 
             foreach (var recipe in StarterSylvanRealmLayouts.All)
             {
-                var result = RealmLayoutRecipeValidator.Validate(recipe);
+                var result = RealmLayoutRecipeValidator.ValidateStarterRecipe(recipe);
 
                 Assert.That(result.IsValid, Is.True, recipe.LayoutId);
+                Assert.That(recipe.Nodes, Has.Count.EqualTo(7), recipe.LayoutId);
                 Assert.That(recipe.ExpansionSockets, Is.Not.Empty, recipe.LayoutId);
                 Assert.That(recipe.Landmarks, Is.Not.Empty, recipe.LayoutId);
                 Assert.That(HasKind(recipe.Nodes, RealmLayoutNodeKind.Start), Is.True);
                 Assert.That(HasKind(recipe.Nodes, RealmLayoutNodeKind.Core), Is.True);
+                Assert.That(HasUniqueNodeIds(recipe.Nodes), Is.True, recipe.LayoutId);
+                Assert.That(HasSafeRouteToHeartTree(recipe), Is.True, recipe.LayoutId);
 
                 foreach (var node in recipe.Nodes)
                 {
@@ -38,6 +41,28 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                         node.MaterializationRole,
                         Is.Not.EqualTo(SylvanRealmNodeMaterializationRole.Unknown));
                 }
+
+                Assert.That(
+                    CountRole(recipe.Nodes, SylvanRealmNodeMaterializationRole.PortalStart),
+                    Is.EqualTo(1));
+                Assert.That(
+                    CountRole(recipe.Nodes, SylvanRealmNodeMaterializationRole.LandmarkJunction),
+                    Is.EqualTo(1));
+                Assert.That(
+                    CountRole(recipe.Nodes, SylvanRealmNodeMaterializationRole.WolfGroveEncounter),
+                    Is.EqualTo(1));
+                Assert.That(
+                    CountRole(recipe.Nodes, SylvanRealmNodeMaterializationRole.RootPathHazard),
+                    Is.EqualTo(1));
+                Assert.That(
+                    CountRole(recipe.Nodes, SylvanRealmNodeMaterializationRole.EntGroveEncounter),
+                    Is.EqualTo(1));
+                Assert.That(
+                    CountRole(recipe.Nodes, SylvanRealmNodeMaterializationRole.MoonwellRecovery),
+                    Is.EqualTo(1));
+                Assert.That(
+                    CountRole(recipe.Nodes, SylvanRealmNodeMaterializationRole.HeartTreeObjective),
+                    Is.EqualTo(1));
 
                 foreach (var edge in recipe.Edges)
                 {
@@ -55,6 +80,172 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                         Is.Not.EqualTo(SylvanLandmarkVisualRole.Unknown));
                 }
             }
+        }
+
+        [Test]
+        public void ValidateStarterRecipe_MissingRequiredRoleFailsClosedInStableOrder()
+        {
+            var nodes = CopyNodes(StarterSylvanRealmLayouts.AncientCrossroads.Nodes);
+            nodes[3] = new RealmLayoutNode(
+                nodes[3].NodeId,
+                nodes[3].ContentId,
+                nodes[3].Kind,
+                SylvanRealmNodeMaterializationRole.Unknown,
+                nodes[3].X,
+                nodes[3].Z);
+            var result = RealmLayoutRecipeValidator.ValidateStarterRecipe(
+                CopyRecipeWithNodes(StarterSylvanRealmLayouts.AncientCrossroads, nodes));
+
+            Assert.That(result.IsValid, Is.False);
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    RealmLayoutValidationIssue.NodeMaterializationRoleInvalid,
+                    RealmLayoutValidationIssue.RootPathHazardRoleCardinalityInvalid
+                },
+                result.Issues);
+        }
+
+        [Test]
+        public void ValidateStarterRecipe_DuplicateRequiredRoleFailsClosedInStableOrder()
+        {
+            var nodes = CopyNodes(StarterSylvanRealmLayouts.AncientCrossroads.Nodes);
+            nodes[5] = new RealmLayoutNode(
+                nodes[5].NodeId,
+                nodes[5].ContentId,
+                nodes[5].Kind,
+                SylvanRealmNodeMaterializationRole.RootPathHazard,
+                nodes[5].X,
+                nodes[5].Z);
+            var result = RealmLayoutRecipeValidator.ValidateStarterRecipe(
+                CopyRecipeWithNodes(StarterSylvanRealmLayouts.AncientCrossroads, nodes));
+
+            Assert.That(result.IsValid, Is.False);
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    RealmLayoutValidationIssue.RootPathHazardRoleCardinalityInvalid,
+                    RealmLayoutValidationIssue.MoonwellRecoveryRoleCardinalityInvalid
+                },
+                result.Issues);
+        }
+
+        [Test]
+        public void CachedRecipes_HavePairwiseDistinctTopologyAndSafeRouteSignatures()
+        {
+            var ancientSignature = RoleTopologySignature(StarterSylvanRealmLayouts.AncientCrossroads);
+            var forkedSignature = RoleTopologySignature(StarterSylvanRealmLayouts.ForkedCanopy);
+            var serpentSignature = RoleTopologySignature(StarterSylvanRealmLayouts.SerpentRoots);
+
+            Assert.That(ancientSignature, Is.Not.EqualTo(forkedSignature));
+            Assert.That(ancientSignature, Is.Not.EqualTo(serpentSignature));
+            Assert.That(forkedSignature, Is.Not.EqualTo(serpentSignature));
+        }
+
+        [Test]
+        public void Validate_NonAdjacentNodeAndCorridorClearanceFailClosed()
+        {
+            var nodeClearanceRecipe = ValidRecipe(
+                new RealmLayoutNode[]
+                {
+                    new RealmLayoutNode(
+                        "start",
+                        "realmraiders.node.start",
+                        RealmLayoutNodeKind.Start,
+                        SylvanRealmNodeMaterializationRole.PortalStart,
+                        0f,
+                        0f),
+                    new RealmLayoutNode(
+                        "middle",
+                        "realmraiders.node.middle",
+                        RealmLayoutNodeKind.Encounter,
+                        SylvanRealmNodeMaterializationRole.WolfGroveEncounter,
+                        0f,
+                        20f),
+                    new RealmLayoutNode(
+                        "core",
+                        "realmraiders.node.core",
+                        RealmLayoutNodeKind.Core,
+                        SylvanRealmNodeMaterializationRole.HeartTreeObjective,
+                        6f,
+                        10f)
+                },
+                new RealmLayoutEdge[]
+                {
+                    new RealmLayoutEdge("start-middle", "start", "middle", true, 6f),
+                    new RealmLayoutEdge("middle-core", "middle", "core", true, 6f)
+                });
+            var corridorClearanceRecipe = ValidRecipe(
+                new RealmLayoutNode[]
+                {
+                    new RealmLayoutNode(
+                        "start",
+                        "realmraiders.node.start",
+                        RealmLayoutNodeKind.Start,
+                        SylvanRealmNodeMaterializationRole.PortalStart,
+                        0f,
+                        0f),
+                    new RealmLayoutNode(
+                        "middle",
+                        "realmraiders.node.middle",
+                        RealmLayoutNodeKind.Encounter,
+                        SylvanRealmNodeMaterializationRole.WolfGroveEncounter,
+                        0f,
+                        20f),
+                    new RealmLayoutNode(
+                        "core",
+                        "realmraiders.node.core",
+                        RealmLayoutNodeKind.Core,
+                        SylvanRealmNodeMaterializationRole.HeartTreeObjective,
+                        20f,
+                        20f),
+                    new RealmLayoutNode(
+                        "other",
+                        "realmraiders.node.other",
+                        RealmLayoutNodeKind.Landmark,
+                        SylvanRealmNodeMaterializationRole.LandmarkJunction,
+                        20f,
+                        0f)
+                },
+                new RealmLayoutEdge[]
+                {
+                    new RealmLayoutEdge("start-core", "start", "core", true, 6f),
+                    new RealmLayoutEdge("middle-other", "middle", "other", false, 6f)
+                });
+
+            var nodeClearance = RealmLayoutRecipeValidator.Validate(nodeClearanceRecipe);
+            var corridorClearance = RealmLayoutRecipeValidator.Validate(corridorClearanceRecipe);
+
+            CollectionAssert.Contains(
+                nodeClearance.Issues,
+                RealmLayoutValidationIssue.NodeCorridorClearanceInvalid);
+            CollectionAssert.Contains(
+                corridorClearance.Issues,
+                RealmLayoutValidationIssue.CorridorClearanceInvalid);
+        }
+
+        [Test]
+        public void ResolveExact_ReturnsOnlyTheCachedExactStarterRecipe()
+        {
+            var resolved = StarterSylvanRealmLayoutResolver.ResolveExact(
+                StarterSylvanRealmLayouts.ForkedCanopyId);
+
+            Assert.That(resolved.Status, Is.EqualTo(RealmLayoutResolveStatus.Resolved));
+            Assert.That(resolved.Recipe, Is.SameAs(StarterSylvanRealmLayouts.ForkedCanopy));
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("unknown-layout")]
+        [TestCase(" realmraiders.sylvan-layout.ancient-crossroads")]
+        [TestCase("realmraiders.sylvan-layout.ancient-crossroads ")]
+        [TestCase("REALMRAIDERS.SYLVAN-LAYOUT.ANCIENT-CROSSROADS")]
+        public void ResolveExact_RejectsNullUnknownAndNonExactIds(string layoutId)
+        {
+            var result = StarterSylvanRealmLayoutResolver.ResolveExact(layoutId);
+
+            Assert.That(result.Status, Is.EqualTo(RealmLayoutResolveStatus.LayoutIdInvalid));
+            Assert.That(result.Recipe, Is.Null);
         }
 
         [Test]
@@ -518,6 +709,144 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
             }
 
             return layoutIds;
+        }
+
+        private static RealmLayoutNode[] CopyNodes(IReadOnlyList<RealmLayoutNode> nodes)
+        {
+            var copy = new RealmLayoutNode[nodes.Count];
+            for (var index = 0; index < nodes.Count; index++)
+            {
+                copy[index] = nodes[index];
+            }
+
+            return copy;
+        }
+
+        private static RealmLayoutRecipe CopyRecipeWithNodes(
+            RealmLayoutRecipe source,
+            IReadOnlyList<RealmLayoutNode> nodes)
+        {
+            return new RealmLayoutRecipe(
+                source.LayoutId,
+                source.DisplayName,
+                nodes,
+                source.Edges,
+                source.Landmarks,
+                source.ExpansionSockets);
+        }
+
+        private static int CountRole(
+            IReadOnlyList<RealmLayoutNode> nodes,
+            SylvanRealmNodeMaterializationRole role)
+        {
+            var count = 0;
+            foreach (var node in nodes)
+            {
+                if (node != null && node.MaterializationRole == role)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private static bool HasUniqueNodeIds(IReadOnlyList<RealmLayoutNode> nodes)
+        {
+            var nodeIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var node in nodes)
+            {
+                if (node == null || !nodeIds.Add(node.NodeId))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool HasSafeRouteToHeartTree(RealmLayoutRecipe recipe)
+        {
+            var startNodeId = string.Empty;
+            var heartTreeNodeId = string.Empty;
+            foreach (var node in recipe.Nodes)
+            {
+                if (node.MaterializationRole == SylvanRealmNodeMaterializationRole.PortalStart)
+                {
+                    startNodeId = node.NodeId;
+                }
+
+                if (node.MaterializationRole == SylvanRealmNodeMaterializationRole.HeartTreeObjective)
+                {
+                    heartTreeNodeId = node.NodeId;
+                }
+            }
+
+            var visited = new HashSet<string>(StringComparer.Ordinal)
+            {
+                startNodeId
+            };
+            var pending = new Queue<string>();
+            pending.Enqueue(startNodeId);
+            while (pending.Count > 0)
+            {
+                var currentNodeId = pending.Dequeue();
+                foreach (var edge in recipe.Edges)
+                {
+                    if (!edge.IsActivePathSafe)
+                    {
+                        continue;
+                    }
+
+                    var adjacentNodeId = string.Equals(
+                        edge.FromNodeId,
+                        currentNodeId,
+                        StringComparison.Ordinal)
+                        ? edge.ToNodeId
+                        : string.Equals(edge.ToNodeId, currentNodeId, StringComparison.Ordinal)
+                            ? edge.FromNodeId
+                            : null;
+                    if (adjacentNodeId != null && visited.Add(adjacentNodeId))
+                    {
+                        pending.Enqueue(adjacentNodeId);
+                    }
+                }
+            }
+
+            return visited.Contains(heartTreeNodeId);
+        }
+
+        private static string RoleTopologySignature(RealmLayoutRecipe recipe)
+        {
+            var rolesByNodeId = new Dictionary<string, SylvanRealmNodeMaterializationRole>(
+                StringComparer.Ordinal);
+            foreach (var node in recipe.Nodes)
+            {
+                rolesByNodeId.Add(node.NodeId, node.MaterializationRole);
+            }
+
+            var edgeSignatures = new List<string>();
+            foreach (var edge in recipe.Edges)
+            {
+                var firstRole = rolesByNodeId[edge.FromNodeId].ToString();
+                var secondRole = rolesByNodeId[edge.ToNodeId].ToString();
+                if (string.CompareOrdinal(firstRole, secondRole) > 0)
+                {
+                    var temporary = firstRole;
+                    firstRole = secondRole;
+                    secondRole = temporary;
+                }
+
+                edgeSignatures.Add(
+                    firstRole
+                    + "-"
+                    + secondRole
+                    + ":"
+                    + (edge.IsActivePathSafe ? "safe" : "unsafe"));
+            }
+
+            edgeSignatures.Sort(StringComparer.Ordinal);
+            return string.Join("|", edgeSignatures);
         }
 
         private static bool HasKind(

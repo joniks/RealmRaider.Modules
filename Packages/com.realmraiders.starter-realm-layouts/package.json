@@ -1,6 +1,6 @@
 {
   "name": "com.realmraiders.starter-realm-layouts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "displayName": "Realm Raiders Starter Realm Layouts",
   "description": "Explicit deterministic Sylvan starter realm layout recipes for a later Core adapter.",
   "unity": "6000.6",
