@@ -1,0 +1,7 @@
+{
+  "name": "RealmRaiders.SylvanEncounters",
+  "rootNamespace": "RealmRaiders.Modules.SylvanEncounters",
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

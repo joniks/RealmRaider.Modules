@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.SylvanEncounters.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.SylvanEncounters.Tests",
+  "references": [
+    "RealmRaiders.SylvanEncounters"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
