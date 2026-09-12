@@ -274,6 +274,38 @@ namespace RealmRaiders.Modules.SylvanEncounterPacing.Tests
         }
 
         [Test]
+        public void Validate_IncompleteButOtherwiseValidPacingFailsClosedWithCoverageIssue()
+        {
+            var recipe = new SylvanEncounterPacingRecipe(
+                StarterSylvanRealmLayouts.AncientCrossroadsId,
+                "ENT THEN HEART",
+                new SylvanEncounterPacingBeat[]
+                {
+                    new SylvanEncounterPacingBeat(
+                        "incomplete.ent",
+                        SylvanRealmNodeMaterializationRole.EntGroveEncounter,
+                        SylvanEncounterPacingBeatKind.Encounter,
+                        SylvanEncounterPacingRequirement.Required),
+                    new SylvanEncounterPacingBeat(
+                        "incomplete.heart",
+                        SylvanRealmNodeMaterializationRole.HeartTreeObjective,
+                        SylvanEncounterPacingBeatKind.Objective,
+                        SylvanEncounterPacingRequirement.Required)
+                },
+                Array.Empty<SylvanEncounterPacingChoice>());
+
+            var result = SylvanEncounterPacingEvidence.Validate(recipe);
+
+            Assert.That(result.IsValid, Is.False);
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    SylvanEncounterPacingValidationIssue.PacingRoleCoverageInvalid
+                },
+                result.Issues);
+        }
+
+        [Test]
         public void Validate_UnknownLayoutFailsClosed()
         {
             var recipe = new SylvanEncounterPacingRecipe(

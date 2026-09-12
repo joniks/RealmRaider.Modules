@@ -49,6 +49,7 @@ namespace RealmRaiders.Modules.SylvanEncounterPacing
         BeatRoleDuplicate,
         BeatKindInvalid,
         BeatRequirementInvalid,
+        PacingRoleCoverageInvalid,
         HeartSequenceInvalid,
         ChoiceMissing,
         ChoiceIdInvalid,
@@ -276,6 +277,7 @@ namespace RealmRaiders.Modules.SylvanEncounterPacing
             }
 
             var beatRoles = ValidateBeats(recipe.Beats, layout, issues);
+            ValidatePacingRoleCoverage(recipe.Beats, layout, issues);
             ValidateRequiredHeartSequence(recipe.Beats, layout, issues);
             ValidateChoices(recipe.Choices, layout, beatRoles, issues);
 
@@ -371,6 +373,53 @@ namespace RealmRaiders.Modules.SylvanEncounterPacing
             }
 
             return roles;
+        }
+
+        private static void ValidatePacingRoleCoverage(
+            IReadOnlyList<SylvanEncounterPacingBeat> beats,
+            RealmLayoutRecipe layout,
+            ICollection<SylvanEncounterPacingValidationIssue> issues)
+        {
+            if (layout == null)
+            {
+                return;
+            }
+
+            var expectedRoleCounts = new Dictionary<SylvanRealmNodeMaterializationRole, int>();
+            foreach (var node in layout.Nodes)
+            {
+                if (node == null || !IsPacingRole(node.MaterializationRole))
+                {
+                    continue;
+                }
+
+                if (!expectedRoleCounts.ContainsKey(node.MaterializationRole))
+                {
+                    expectedRoleCounts.Add(node.MaterializationRole, 0);
+                }
+            }
+
+            if (beats != null)
+            {
+                foreach (var beat in beats)
+                {
+                    if (beat != null && expectedRoleCounts.ContainsKey(beat.Role))
+                    {
+                        expectedRoleCounts[beat.Role]++;
+                    }
+                }
+            }
+
+            foreach (var pair in expectedRoleCounts)
+            {
+                if (pair.Value != 1)
+                {
+                    AddIssue(
+                        issues,
+                        SylvanEncounterPacingValidationIssue.PacingRoleCoverageInvalid);
+                    return;
+                }
+            }
         }
 
         private static void ValidateRequiredHeartSequence(
