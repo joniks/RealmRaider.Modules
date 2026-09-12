@@ -1,0 +1,15 @@
+{
+  "name": "RealmRaiders.StarterRealmIdentityPlanning",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmIdentityPlanning",
+  "references": [
+    "RealmRaiders.SeededLayoutSelection",
+    "RealmRaiders.StarterRealmSeededSelection",
+    "RealmRaiders.StarterRealmIdentityRecord",
+    "RealmRaiders.StarterRealmLayouts",
+    "RealmRaiders.InfernalDefenseLayouts",
+    "RealmRaiders.RealmLayoutContracts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

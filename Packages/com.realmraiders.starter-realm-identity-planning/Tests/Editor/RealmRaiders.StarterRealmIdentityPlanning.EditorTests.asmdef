@@ -1,0 +1,22 @@
+{
+  "name": "RealmRaiders.StarterRealmIdentityPlanning.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmIdentityPlanning.Tests",
+  "references": [
+    "RealmRaiders.StarterRealmIdentityPlanning",
+    "RealmRaiders.SeededLayoutSelection",
+    "RealmRaiders.StarterRealmSeededSelection",
+    "RealmRaiders.StarterRealmIdentityRecord",
+    "RealmRaiders.StarterRealmLayouts",
+    "RealmRaiders.InfernalDefenseLayouts",
+    "RealmRaiders.RealmLayoutContracts"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

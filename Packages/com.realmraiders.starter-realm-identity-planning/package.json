@@ -1,0 +1,18 @@
+{
+  "name": "com.realmraiders.starter-realm-identity-planning",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Starter Realm Identity Planning",
+  "description": "Composes exact seeded starter layouts with portable canonical identity records.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.seeded-layout-selection": "0.1.0",
+    "com.realmraiders.starter-realm-seeded-selection": "0.1.0",
+    "com.realmraiders.starter-realm-identity-record": "0.1.0",
+    "com.realmraiders.starter-realm-layouts": "0.2.2",
+    "com.realmraiders.infernal-defense-layouts": "0.1.0",
+    "com.realmraiders.realm-layout-contracts": "0.1.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}
