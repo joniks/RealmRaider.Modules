@@ -105,6 +105,41 @@ namespace RealmRaiders.Modules.RealmGrowthContracts.Tests
         }
 
         [Test]
+        public void Validate_RejectsAnEmptyCatalogue()
+        {
+            var result = RealmGrowthTierContracts.Validate(
+                new RealmGrowthTierCatalogue(Array.Empty<RealmGrowthTier>()));
+
+            Assert.That(result.IsValid, Is.False);
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    RealmGrowthTierValidationIssue.TierCardinalityInvalid
+                },
+                result.Issues);
+        }
+
+        [TestCase("Tier.one")]
+        [TestCase("tier.one ")]
+        public void Validate_RejectsMalformedCatalogueOwnedTierIds(string tierId)
+        {
+            var result = RealmGrowthTierContracts.Validate(
+                new RealmGrowthTierCatalogue(
+                    new RealmGrowthTier[]
+                    {
+                        new RealmGrowthTier(tierId, 0, 8, 3, 0)
+                    }));
+
+            Assert.That(result.IsValid, Is.False);
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    RealmGrowthTierValidationIssue.TierIdInvalid
+                },
+                result.Issues);
+        }
+
+        [Test]
         public void ResolveAndLookup_RejectInvalidCatalogueWithOrderedEvidence()
         {
             var invalidCatalogue = new RealmGrowthTierCatalogue(
