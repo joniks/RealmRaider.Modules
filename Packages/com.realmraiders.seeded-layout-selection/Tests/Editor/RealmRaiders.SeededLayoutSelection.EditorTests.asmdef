@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.SeededLayoutSelection.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.SeededLayoutSelection.Tests",
+  "references": [
+    "RealmRaiders.SeededLayoutSelection"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

@@ -1,0 +1,8 @@
+{
+  "name": "RealmRaiders.SeededLayoutSelection",
+  "rootNamespace": "RealmRaiders.Modules.SeededLayoutSelection",
+  "references": [],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
