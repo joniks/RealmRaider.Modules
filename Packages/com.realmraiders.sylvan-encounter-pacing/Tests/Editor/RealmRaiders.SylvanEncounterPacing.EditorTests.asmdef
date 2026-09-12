@@ -2,7 +2,8 @@
   "name": "RealmRaiders.SylvanEncounterPacing.EditorTests",
   "rootNamespace": "RealmRaiders.Modules.SylvanEncounterPacing.Tests",
   "references": [
-    "RealmRaiders.SylvanEncounterPacing"
+    "RealmRaiders.SylvanEncounterPacing",
+    "RealmRaiders.StarterRealmLayouts"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"
