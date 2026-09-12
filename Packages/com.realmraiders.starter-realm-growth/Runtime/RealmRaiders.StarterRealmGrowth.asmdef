@@ -1,0 +1,11 @@
+{
+  "name": "RealmRaiders.StarterRealmGrowth",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmGrowth",
+  "references": [
+    "RealmRaiders.StarterRealmLayouts",
+    "RealmRaiders.RealmGrowthContracts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
