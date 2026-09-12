@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.InfernalDefensePacingProgression",
+  "rootNamespace": "RealmRaiders.Modules.InfernalDefensePacingProgression",
+  "references": [
+    "RealmRaiders.InfernalDefensePacing"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

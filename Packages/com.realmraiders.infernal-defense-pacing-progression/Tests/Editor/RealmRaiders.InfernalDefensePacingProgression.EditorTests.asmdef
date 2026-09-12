@@ -1,0 +1,17 @@
+{
+  "name": "RealmRaiders.InfernalDefensePacingProgression.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.InfernalDefensePacingProgression.Tests",
+  "references": [
+    "RealmRaiders.InfernalDefensePacingProgression",
+    "RealmRaiders.InfernalDefensePacing"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
