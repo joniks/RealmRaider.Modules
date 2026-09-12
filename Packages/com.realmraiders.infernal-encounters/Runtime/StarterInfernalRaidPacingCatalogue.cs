@@ -129,6 +129,16 @@ namespace RealmRaiders.Modules.InfernalEncounters
 
         public const string InfernalBruteDefeatedGateId = "realmraiders.infernal.infernal-brute-defeated";
 
+        public const string BruteFinaleHellhoundABeatId = "brute-finale.hellhound-a";
+
+        public const string BruteFinaleHellhoundBBeatId = "brute-finale.hellhound-b";
+
+        public const string BruteFinaleFlameChoiceBeatId = "brute-finale.flame-choice";
+
+        public const string BruteFinaleInfernalBruteBeatId = "brute-finale.infernal-brute";
+
+        public const string BruteFinaleInfernalHeartBeatId = "brute-finale.infernal-heart";
+
         public static InfernalRaidPacingComposition EntryTrial { get; } =
             new InfernalRaidPacingComposition(
                 "realmraiders.infernal-raid.entry-trial",
@@ -224,7 +234,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                 new InfernalRaidPacingBeat[]
                 {
                     new InfernalRaidPacingBeat(
-                        "brute-finale.hellhound-a",
+                        BruteFinaleHellhoundABeatId,
                         "First Hellhound",
                         InfernalRaidBeatKind.Enemy,
                         HellhoundArchetypeId,
@@ -234,7 +244,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                         2,
                         18),
                     new InfernalRaidPacingBeat(
-                        "brute-finale.hellhound-b",
+                        BruteFinaleHellhoundBBeatId,
                         "Second Hellhound",
                         InfernalRaidBeatKind.Enemy,
                         HellhoundArchetypeId,
@@ -244,7 +254,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                         18,
                         32),
                     new InfernalRaidPacingBeat(
-                        "brute-finale.flame-choice",
+                        BruteFinaleFlameChoiceBeatId,
                         "Bypass the Flame",
                         InfernalRaidBeatKind.Hazard,
                         FlameTrapContentId,
@@ -254,7 +264,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                         32,
                         42),
                     new InfernalRaidPacingBeat(
-                        "brute-finale.infernal-brute",
+                        BruteFinaleInfernalBruteBeatId,
                         "Infernal Brute",
                         InfernalRaidBeatKind.Enemy,
                         InfernalBruteArchetypeId,
@@ -264,7 +274,7 @@ namespace RealmRaiders.Modules.InfernalEncounters
                         42,
                         70),
                     new InfernalRaidPacingBeat(
-                        "brute-finale.infernal-heart",
+                        BruteFinaleInfernalHeartBeatId,
                         "Claim the Infernal Heart",
                         InfernalRaidBeatKind.Objective,
                         InfernalHeartContentId,

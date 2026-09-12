@@ -148,8 +148,11 @@ namespace RealmRaiders.Modules.InfernalEncounters.Tests
                     StarterInfernalRaidPacingCatalogue.GuardianEntArchetypeId));
                 Assert.That(composition.EntryPrerequisiteGateId, Is.EqualTo(
                     StarterInfernalRaidPacingCatalogue.EntDirectControlGateId));
+                var expectedCompletionGateId = composition == StarterInfernalRaidPacingCatalogue.BruteFinale
+                    ? StarterInfernalRaidPacingCatalogue.InfernalBruteDefeatedGateId
+                    : StarterInfernalRaidPacingCatalogue.AllHostilesClearedGateId;
                 Assert.That(composition.CompletionPrerequisiteGateId, Is.EqualTo(
-                    StarterInfernalRaidPacingCatalogue.AllHostilesClearedGateId));
+                    expectedCompletionGateId));
                 Assert.That(composition.Beats.Count, Is.GreaterThan(0));
                 Assert.That(composition.Beats.Last().Kind, Is.EqualTo(
                     InfernalRaidBeatKind.Objective));

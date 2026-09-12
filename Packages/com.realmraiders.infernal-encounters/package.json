@@ -1,6 +1,6 @@
 {
   "name": "com.realmraiders.infernal-encounters",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Realm Raiders Infernal Encounters",
   "description": "Explicit Infernal raid pacing presets for a later Core adapter.",
   "unity": "6000.6",
