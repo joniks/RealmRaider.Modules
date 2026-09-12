@@ -26,3 +26,8 @@ persist anything.
 returns one validated cached recipe and avoids an exact previous recipe ID when an
 alternative exists. Core remains responsible for persistence, materialization,
 spawning, gameplay, rewards, and all runtime random state.
+
+`StarterSylvanRealmLayoutGraphAdapter.Adapt(recipe)` is an additive bridge to the
+faction-neutral `com.realmraiders.realm-layout-contracts` graph. It preserves the
+existing public Sylvan recipe types and exact-seven-role validator; it does not
+replace them or infer a new role vocabulary.

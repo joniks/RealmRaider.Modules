@@ -1,8 +1,7 @@
 {
-  "name": "RealmRaiders.StarterRealmLayouts.EditorTests",
-  "rootNamespace": "RealmRaiders.Modules.StarterRealmLayouts.Tests",
+  "name": "RealmRaiders.RealmLayoutContracts.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.RealmLayoutContracts.Tests",
   "references": [
-    "RealmRaiders.StarterRealmLayouts",
     "RealmRaiders.RealmLayoutContracts"
   ],
   "optionalUnityReferences": [

@@ -1,6 +1,9 @@
 {
   "name": "RealmRaiders.StarterRealmLayouts",
   "rootNamespace": "RealmRaiders.Modules.StarterRealmLayouts",
+  "references": [
+    "RealmRaiders.RealmLayoutContracts"
+  ],
   "autoReferenced": false,
   "overrideReferences": false,
   "noEngineReferences": true
