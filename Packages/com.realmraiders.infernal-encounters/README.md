@@ -41,3 +41,12 @@ over the cached spatial recipes and fail-closed validation evidence for a suppli
 recipe. Validation checks its pacing ID, Guardian Ent hero, finite in-lane
 placements, ordered one-to-one beat/content mapping, and required hazard cardinality
 and bypass facts. It neither chooses a variant nor creates or changes gameplay.
+
+## Compact presentation facts
+
+`StarterInfernalRaidPresentationCatalogue` mirrors the same `EntryTrial`,
+`RiskRoute`, `BruteFinale` order with canonical display names and compact all-caps
+tactical summaries. The summaries state only existing enemy, optional Flame bypass,
+and approximate-duration facts. Its ordinal lookup and validation evidence do not
+choose a raid, create UI, or add gameplay authority; Core deliberately decides if it
+shows a returned fact.
