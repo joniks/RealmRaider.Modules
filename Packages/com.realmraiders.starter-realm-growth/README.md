@@ -11,3 +11,7 @@ how or whether a returned socket plan becomes gameplay.
 
 Null, malformed, non-canonical layout, invalid tier, malformed socket, and capacity
 overflow inputs return immutable ordered evidence with no plan.
+
+Version `0.1.2` preserves this public Sylvan API and its exact authored socket
+references while delegating valid faction-neutral selection to
+`com.realmraiders.realm-expansion-planning` through the existing graph adapter.

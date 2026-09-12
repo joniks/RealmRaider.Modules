@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using RealmRaiders.Modules.RealmExpansionPlanning;
 using RealmRaiders.Modules.RealmGrowthContracts;
 using RealmRaiders.Modules.StarterRealmLayouts;
 
@@ -152,6 +153,50 @@ namespace RealmRaiders.Modules.StarterRealmGrowth.Tests
                 ((IList<StarterRealmExpansionPlanIssue>)
                     StarterRealmExpansionPlanEvaluator.Evaluate(null, null).Issues)[0] =
                     StarterRealmExpansionPlanIssue.LayoutInvalid);
+        }
+
+        [Test]
+        public void Evaluate_PreservesPublicSylvanSemanticsWhileDelegatingToGenericPlanner()
+        {
+            foreach (var layout in StarterSylvanRealmLayouts.All)
+            {
+                for (var capacity = 0;
+                     capacity <= layout.ExpansionSockets.Count;
+                     capacity++)
+                {
+                    var tier = ValidTier(capacity);
+                    var legacy = StarterRealmExpansionPlanEvaluator.Evaluate(layout, tier);
+                    var generic = RealmExpansionPlanEvaluator.Evaluate(
+                        StarterSylvanRealmLayoutGraphAdapter.Adapt(layout),
+                        tier);
+
+                    Assert.That(legacy.HasPlan, Is.True);
+                    Assert.That(generic.HasPlan, Is.True);
+                    Assert.That(legacy.Plan.LayoutId, Is.EqualTo(generic.Plan.LayoutId));
+                    Assert.That(legacy.Plan.TierId, Is.EqualTo(generic.Plan.TierId));
+                    Assert.That(
+                        legacy.Plan.ExpansionSockets.Count,
+                        Is.EqualTo(generic.Plan.ExpansionSockets.Count));
+                    for (var index = 0; index < capacity; index++)
+                    {
+                        Assert.That(
+                            legacy.Plan.ExpansionSockets[index],
+                            Is.SameAs(layout.ExpansionSockets[index]));
+                        Assert.That(
+                            legacy.Plan.ExpansionSockets[index].SocketId,
+                            Is.EqualTo(generic.Plan.ExpansionSockets[index].SocketId));
+                        Assert.That(
+                            legacy.Plan.ExpansionSockets[index].NodeId,
+                            Is.EqualTo(generic.Plan.ExpansionSockets[index].NodeId));
+                        Assert.That(
+                            legacy.Plan.ExpansionSockets[index].X,
+                            Is.EqualTo(generic.Plan.ExpansionSockets[index].X));
+                        Assert.That(
+                            legacy.Plan.ExpansionSockets[index].Z,
+                            Is.EqualTo(generic.Plan.ExpansionSockets[index].Z));
+                    }
+                }
+            }
         }
 
         private static void AssertPlan(

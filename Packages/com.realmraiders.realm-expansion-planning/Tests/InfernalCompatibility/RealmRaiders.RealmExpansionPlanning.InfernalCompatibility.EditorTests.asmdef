@@ -1,0 +1,29 @@
+{
+  "name": "RealmRaiders.RealmExpansionPlanning.InfernalCompatibility.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.RealmExpansionPlanning.InfernalCompatibility.Tests",
+  "references": [
+    "RealmRaiders.RealmExpansionPlanning",
+    "RealmRaiders.RealmLayoutContracts",
+    "RealmRaiders.RealmGrowthContracts",
+    "RealmRaiders.InfernalDefenseLayouts"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "defineConstraints": [
+    "REALMRAIDERS_INFERNAL_DEFENSE_LAYOUTS"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.realmraiders.infernal-defense-layouts",
+      "expression": "[0.1.0,1.0.0)",
+      "define": "REALMRAIDERS_INFERNAL_DEFENSE_LAYOUTS"
+    }
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

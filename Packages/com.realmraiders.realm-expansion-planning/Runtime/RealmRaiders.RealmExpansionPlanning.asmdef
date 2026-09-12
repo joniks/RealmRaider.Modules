@@ -1,0 +1,11 @@
+{
+  "name": "RealmRaiders.RealmExpansionPlanning",
+  "rootNamespace": "RealmRaiders.Modules.RealmExpansionPlanning",
+  "references": [
+    "RealmRaiders.RealmLayoutContracts",
+    "RealmRaiders.RealmGrowthContracts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

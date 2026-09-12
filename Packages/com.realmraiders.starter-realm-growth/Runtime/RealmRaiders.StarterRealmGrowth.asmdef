@@ -3,7 +3,9 @@
   "rootNamespace": "RealmRaiders.Modules.StarterRealmGrowth",
   "references": [
     "RealmRaiders.StarterRealmLayouts",
-    "RealmRaiders.RealmGrowthContracts"
+    "RealmRaiders.RealmGrowthContracts",
+    "RealmRaiders.RealmLayoutContracts",
+    "RealmRaiders.RealmExpansionPlanning"
   ],
   "autoReferenced": false,
   "overrideReferences": false,

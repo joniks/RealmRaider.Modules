@@ -1,0 +1,14 @@
+{
+  "name": "com.realmraiders.realm-expansion-planning",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Realm Expansion Planning",
+  "description": "Faction-neutral immutable expansion planning over validated layout graphs and growth tiers.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.realm-layout-contracts": "0.1.0",
+    "com.realmraiders.realm-growth-contracts": "0.1.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

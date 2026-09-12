@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RealmRaiders.Modules.RealmExpansionPlanning;
 using RealmRaiders.Modules.RealmGrowthContracts;
 using RealmRaiders.Modules.StarterRealmLayouts;
 
@@ -145,7 +146,20 @@ namespace RealmRaiders.Modules.StarterRealmGrowth
                     issues);
             }
 
-            var selectedSockets = new RealmLayoutExpansionSocket[tier.ExpansionAnchorCapacity];
+            var genericLayout = StarterSylvanRealmLayoutGraphAdapter.Adapt(layout);
+            var genericResult = RealmExpansionPlanEvaluator.Evaluate(genericLayout, tier);
+            if (!genericResult.HasPlan)
+            {
+                MapGenericFailure(genericResult.Issues, issues);
+                return new StarterRealmExpansionPlanResult(
+                    StarterRealmExpansionPlanStatus.Rejected,
+                    null,
+                    issues);
+            }
+
+            // Preserve the established Sylvan API's exact authored socket instances.
+            var selectedSockets = new RealmLayoutExpansionSocket[
+                genericResult.Plan.ExpansionSockets.Count];
             for (var index = 0; index < selectedSockets.Length; index++)
             {
                 selectedSockets[index] = layout.ExpansionSockets[index];
@@ -155,6 +169,59 @@ namespace RealmRaiders.Modules.StarterRealmGrowth
                 StarterRealmExpansionPlanStatus.Planned,
                 new StarterRealmExpansionPlan(layout.LayoutId, tier.TierId, selectedSockets),
                 Array.AsReadOnly(Array.Empty<StarterRealmExpansionPlanIssue>()));
+        }
+
+        private static void MapGenericFailure(
+            IReadOnlyList<RealmExpansionPlanIssue> genericIssues,
+            ICollection<StarterRealmExpansionPlanIssue> issues)
+        {
+            foreach (var issue in genericIssues)
+            {
+                switch (issue)
+                {
+                    case RealmExpansionPlanIssue.LayoutMissing:
+                        AddIssue(issues, StarterRealmExpansionPlanIssue.LayoutMissing);
+                        break;
+                    case RealmExpansionPlanIssue.LayoutIdInvalid:
+                        AddIssue(issues, StarterRealmExpansionPlanIssue.LayoutIdInvalid);
+                        break;
+                    case RealmExpansionPlanIssue.LayoutInvalid:
+                        AddIssue(issues, StarterRealmExpansionPlanIssue.LayoutInvalid);
+                        break;
+                    case RealmExpansionPlanIssue.TierMissing:
+                        AddIssue(issues, StarterRealmExpansionPlanIssue.TierMissing);
+                        break;
+                    case RealmExpansionPlanIssue.TierIdInvalid:
+                        AddIssue(issues, StarterRealmExpansionPlanIssue.TierIdInvalid);
+                        break;
+                    case RealmExpansionPlanIssue.TierFactsInvalid:
+                        AddIssue(issues, StarterRealmExpansionPlanIssue.TierFactsInvalid);
+                        break;
+                    case RealmExpansionPlanIssue.ExpansionSocketMissing:
+                    case RealmExpansionPlanIssue.ExpansionSocketIdInvalid:
+                    case RealmExpansionPlanIssue.ExpansionSocketIdDuplicate:
+                    case RealmExpansionPlanIssue.ExpansionSocketNodeInvalid:
+                    case RealmExpansionPlanIssue.ExpansionSocketCoordinateInvalid:
+                        AddIssue(
+                            issues,
+                            StarterRealmExpansionPlanIssue.ExpansionSocketFactInvalid);
+                        break;
+                    case RealmExpansionPlanIssue.ExpansionAnchorCapacityExceedsAvailableSockets:
+                        AddIssue(
+                            issues,
+                            StarterRealmExpansionPlanIssue
+                                .ExpansionAnchorCapacityExceedsAvailableSockets);
+                        break;
+                    default:
+                        AddIssue(issues, StarterRealmExpansionPlanIssue.LayoutInvalid);
+                        break;
+                }
+            }
+
+            if (issues.Count == 0)
+            {
+                AddIssue(issues, StarterRealmExpansionPlanIssue.LayoutInvalid);
+            }
         }
 
         private static void ValidateLayout(

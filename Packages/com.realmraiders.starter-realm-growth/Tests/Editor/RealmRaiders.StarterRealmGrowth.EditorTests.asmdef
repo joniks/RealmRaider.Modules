@@ -4,7 +4,9 @@
   "references": [
     "RealmRaiders.StarterRealmGrowth",
     "RealmRaiders.StarterRealmLayouts",
-    "RealmRaiders.RealmGrowthContracts"
+    "RealmRaiders.RealmGrowthContracts",
+    "RealmRaiders.RealmLayoutContracts",
+    "RealmRaiders.RealmExpansionPlanning"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

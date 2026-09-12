@@ -1,12 +1,14 @@
 {
   "name": "com.realmraiders.starter-realm-growth",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "Realm Raiders Starter Realm Growth",
   "description": "Pure expansion-plan evaluation over resolved starter layouts and growth tiers.",
   "unity": "6000.6",
   "dependencies": {
     "com.realmraiders.starter-realm-layouts": "0.2.2",
-    "com.realmraiders.realm-growth-contracts": "0.1.0"
+    "com.realmraiders.realm-growth-contracts": "0.1.0",
+    "com.realmraiders.realm-layout-contracts": "0.1.0",
+    "com.realmraiders.realm-expansion-planning": "0.1.0"
   },
   "author": {
     "name": "Realm Raiders"
