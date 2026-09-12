@@ -31,7 +31,98 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                 Assert.That(recipe.Landmarks, Is.Not.Empty, recipe.LayoutId);
                 Assert.That(HasKind(recipe.Nodes, RealmLayoutNodeKind.Start), Is.True);
                 Assert.That(HasKind(recipe.Nodes, RealmLayoutNodeKind.Core), Is.True);
+
+                foreach (var node in recipe.Nodes)
+                {
+                    Assert.That(
+                        node.MaterializationRole,
+                        Is.Not.EqualTo(SylvanRealmNodeMaterializationRole.Unknown));
+                }
+
+                foreach (var edge in recipe.Edges)
+                {
+                    Assert.That(
+                        edge.FloorPathWidth,
+                        Is.InRange(
+                            RealmLayoutRecipeValidator.MinimumFloorPathWidth,
+                            RealmLayoutRecipeValidator.MaximumFloorPathWidth));
+                }
+
+                foreach (var landmark in recipe.Landmarks)
+                {
+                    Assert.That(
+                        landmark.VisualRole,
+                        Is.Not.EqualTo(SylvanLandmarkVisualRole.Unknown));
+                }
             }
+        }
+
+        [Test]
+        public void Validate_MissingOrUnsupportedMaterializationRolesFailClosed()
+        {
+            var nodes = ValidNodes();
+            nodes[1] = new RealmLayoutNode(
+                "middle",
+                "realmraiders.node.middle",
+                RealmLayoutNodeKind.Encounter,
+                SylvanRealmNodeMaterializationRole.Unknown,
+                0f,
+                8f);
+            var missingNodeRole = RealmLayoutRecipeValidator.Validate(ValidRecipe(nodes));
+
+            Assert.That(missingNodeRole.IsValid, Is.False);
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    RealmLayoutValidationIssue.NodeMaterializationRoleInvalid
+                },
+                missingNodeRole.Issues);
+
+            var unsupportedLandmarkRole = RealmLayoutRecipeValidator.Validate(
+                new RealmLayoutRecipe(
+                    "test.recipe",
+                    "Test Recipe",
+                    ValidNodes(),
+                    ValidEdges(),
+                    new RealmLayoutLandmark[]
+                    {
+                        new RealmLayoutLandmark(
+                            "landmark",
+                            "realmraiders.landmark.test",
+                            "middle",
+                            (SylvanLandmarkVisualRole)99)
+                    },
+                    ValidExpansionSockets()));
+
+            Assert.That(unsupportedLandmarkRole.IsValid, Is.False);
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    RealmLayoutValidationIssue.LandmarkVisualRoleInvalid
+                },
+                unsupportedLandmarkRole.Issues);
+        }
+
+        [Test]
+        public void Validate_MissingOrNonPhysicalFloorPathWidthFailsClosed()
+        {
+            var recipe = ValidRecipe(
+                ValidNodes(),
+                new RealmLayoutEdge[]
+                {
+                    new RealmLayoutEdge("start-middle", "start", "middle", true, 0f),
+                    new RealmLayoutEdge("middle-core", "middle", "core", true, float.NaN)
+                });
+
+            var result = RealmLayoutRecipeValidator.Validate(recipe);
+
+            Assert.That(result.IsValid, Is.False);
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    RealmLayoutValidationIssue.EdgeFloorPathWidthInvalid
+                },
+                result.Issues);
         }
 
         [Test]
@@ -56,18 +147,21 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                         "start",
                         "realmraiders.node.start",
                         RealmLayoutNodeKind.Start,
+                        SylvanRealmNodeMaterializationRole.PortalStart,
                         0f,
                         0f),
                     new RealmLayoutNode(
                         "middle",
                         "realmraiders.node.middle",
                         RealmLayoutNodeKind.Encounter,
+                        SylvanRealmNodeMaterializationRole.WolfGroveEncounter,
                         RealmLayoutRecipeValidator.MaximumAbsoluteCoordinate + 0.01f,
                         8f),
                     new RealmLayoutNode(
                         "core",
                         "realmraiders.node.core",
                         RealmLayoutNodeKind.Core,
+                        SylvanRealmNodeMaterializationRole.HeartTreeObjective,
                         0f,
                         16f)
                 });
@@ -85,9 +179,9 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                 ValidNodes(),
                 new RealmLayoutEdge[]
                 {
-                    new RealmLayoutEdge("start-middle", "start", "middle", true),
-                    new RealmLayoutEdge("middle-start", "middle", "start", true),
-                    new RealmLayoutEdge("middle-core", "middle", "core", true)
+                    new RealmLayoutEdge("start-middle", "start", "middle", true, 6f),
+                    new RealmLayoutEdge("middle-start", "middle", "start", true, 6f),
+                    new RealmLayoutEdge("middle-core", "middle", "core", true, 6f)
                 });
 
             var result = RealmLayoutRecipeValidator.Validate(recipe);
@@ -108,8 +202,8 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                 ValidNodes(),
                 new RealmLayoutEdge[]
                 {
-                    new RealmLayoutEdge("core-middle", "core", "middle", true),
-                    new RealmLayoutEdge("middle-start", "middle", "start", true)
+                    new RealmLayoutEdge("core-middle", "core", "middle", true, 6f),
+                    new RealmLayoutEdge("middle-start", "middle", "start", true, 6f)
                 });
 
             var result = RealmLayoutRecipeValidator.Validate(recipe);
@@ -127,18 +221,21 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                         "start",
                         "realmraiders.node.start",
                         RealmLayoutNodeKind.Start,
+                        SylvanRealmNodeMaterializationRole.PortalStart,
                         0f,
                         0f),
                     new RealmLayoutNode(
                         "middle",
                         "realmraiders.node.middle",
                         RealmLayoutNodeKind.Encounter,
+                        SylvanRealmNodeMaterializationRole.WolfGroveEncounter,
                         0f,
                         RealmLayoutRecipeValidator.MinimumNodeSpacing - 0.01f),
                     new RealmLayoutNode(
                         "core",
                         "realmraiders.node.core",
                         RealmLayoutNodeKind.Core,
+                        SylvanRealmNodeMaterializationRole.HeartTreeObjective,
                         0f,
                         16f)
                 });
@@ -162,6 +259,7 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                 "start",
                 string.Empty,
                 RealmLayoutNodeKind.Start,
+                SylvanRealmNodeMaterializationRole.PortalStart,
                 0f,
                 0f);
             var recipe = new RealmLayoutRecipe(
@@ -170,15 +268,16 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                 nodes,
                 new RealmLayoutEdge[]
                 {
-                    new RealmLayoutEdge("start-middle", "start", "middle", true),
-                    new RealmLayoutEdge("middle-core", "middle", "core", true)
+                    new RealmLayoutEdge("start-middle", "start", "middle", true, 6f),
+                    new RealmLayoutEdge("middle-core", "middle", "core", true, 6f)
                 },
                 new RealmLayoutLandmark[]
                 {
                     new RealmLayoutLandmark(
                         "landmark",
                         "realmraiders.landmark.test",
-                        "middle")
+                        "middle",
+                        SylvanLandmarkVisualRole.NodeCanopy)
                 },
                 new RealmLayoutExpansionSocket[]
                 {
@@ -275,18 +374,21 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                     "start",
                     "realmraiders.node.start",
                     RealmLayoutNodeKind.Start,
+                    SylvanRealmNodeMaterializationRole.PortalStart,
                     0f,
                     0f),
                 new RealmLayoutNode(
                     "middle",
                     "realmraiders.node.middle",
                     RealmLayoutNodeKind.Encounter,
+                    SylvanRealmNodeMaterializationRole.WolfGroveEncounter,
                     0f,
                     8f),
                 new RealmLayoutNode(
                     "core",
                     "realmraiders.node.core",
                     RealmLayoutNodeKind.Core,
+                    SylvanRealmNodeMaterializationRole.HeartTreeObjective,
                     0f,
                     16f)
             };
@@ -297,6 +399,12 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
             Assert.That(recipe.Nodes[0], Is.Not.Null);
             Assert.Throws<NotSupportedException>(() =>
                 ((IList<RealmLayoutNode>)recipe.Nodes)[0] = null);
+            Assert.Throws<NotSupportedException>(() =>
+                ((IList<RealmLayoutEdge>)recipe.Edges)[0] = null);
+            Assert.Throws<NotSupportedException>(() =>
+                ((IList<RealmLayoutLandmark>)recipe.Landmarks)[0] = null);
+            Assert.Throws<NotSupportedException>(() =>
+                ((IList<RealmLayoutExpansionSocket>)recipe.ExpansionSockets)[0] = null);
         }
 
         [Test]
@@ -311,24 +419,30 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                         "start",
                         "realmraiders.node.start",
                         RealmLayoutNodeKind.Start,
+                        SylvanRealmNodeMaterializationRole.PortalStart,
                         float.NaN,
                         0f),
                     new RealmLayoutNode(
                         "start",
                         "realmraiders.node.core",
                         RealmLayoutNodeKind.Core,
+                        SylvanRealmNodeMaterializationRole.HeartTreeObjective,
                         0f,
                         16f),
                     null
                 },
                 new RealmLayoutEdge[]
                 {
-                    new RealmLayoutEdge("edge", "start", "missing", false),
-                    new RealmLayoutEdge("edge", "start", "start", false)
+                    new RealmLayoutEdge("edge", "start", "missing", false, 6f),
+                    new RealmLayoutEdge("edge", "start", "start", false, 6f)
                 },
                 new RealmLayoutLandmark[]
                 {
-                    new RealmLayoutLandmark("landmark", "", "missing")
+                    new RealmLayoutLandmark(
+                        "landmark",
+                        "",
+                        "missing",
+                        SylvanLandmarkVisualRole.NodeCanopy)
                 },
                 new RealmLayoutExpansionSocket[]
                 {
@@ -365,24 +479,27 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                         "start",
                         "realmraiders.node.start",
                         RealmLayoutNodeKind.Start,
+                        SylvanRealmNodeMaterializationRole.PortalStart,
                         0f,
                         0f),
                     new RealmLayoutNode(
                         "middle",
                         "realmraiders.node.middle",
                         RealmLayoutNodeKind.Encounter,
+                        SylvanRealmNodeMaterializationRole.WolfGroveEncounter,
                         0f,
                         8f),
                     new RealmLayoutNode(
                         "core",
                         "realmraiders.node.core",
                         RealmLayoutNodeKind.Core,
+                        SylvanRealmNodeMaterializationRole.HeartTreeObjective,
                         0f,
                         16f)
                 },
                 new RealmLayoutEdge[]
                 {
-                    new RealmLayoutEdge("start-middle", "start", "middle", false)
+                    new RealmLayoutEdge("start-middle", "start", "middle", false, 6f)
                 });
 
             var result = RealmLayoutRecipeValidator.Validate(recipe);
@@ -427,22 +544,36 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                 layoutId,
                 "Test Recipe",
                 nodes,
-                edges ?? new RealmLayoutEdge[]
-                {
-                    new RealmLayoutEdge("start-middle", "start", "middle", true),
-                    new RealmLayoutEdge("middle-core", "middle", "core", true)
-                },
+                edges ?? ValidEdges(),
                 new RealmLayoutLandmark[]
                 {
                     new RealmLayoutLandmark(
                         "landmark",
                         "realmraiders.landmark.test",
-                        "middle")
+                        "middle",
+                        SylvanLandmarkVisualRole.NodeCanopy)
                 },
                 new RealmLayoutExpansionSocket[]
                 {
                     new RealmLayoutExpansionSocket("socket", "core", 4f, 18f)
                 });
+        }
+
+        private static RealmLayoutEdge[] ValidEdges()
+        {
+            return new RealmLayoutEdge[]
+            {
+                new RealmLayoutEdge("start-middle", "start", "middle", true, 6f),
+                new RealmLayoutEdge("middle-core", "middle", "core", true, 6f)
+            };
+        }
+
+        private static RealmLayoutExpansionSocket[] ValidExpansionSockets()
+        {
+            return new RealmLayoutExpansionSocket[]
+            {
+                new RealmLayoutExpansionSocket("socket", "core", 4f, 18f)
+            };
         }
 
         private static RealmLayoutNode[] ValidNodes()
@@ -453,18 +584,21 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
                     "start",
                     "realmraiders.node.start",
                     RealmLayoutNodeKind.Start,
+                    SylvanRealmNodeMaterializationRole.PortalStart,
                     0f,
                     0f),
                 new RealmLayoutNode(
                     "middle",
                     "realmraiders.node.middle",
                     RealmLayoutNodeKind.Encounter,
+                    SylvanRealmNodeMaterializationRole.WolfGroveEncounter,
                     0f,
                     8f),
                 new RealmLayoutNode(
                     "core",
                     "realmraiders.node.core",
                     RealmLayoutNodeKind.Core,
+                    SylvanRealmNodeMaterializationRole.HeartTreeObjective,
                     0f,
                     16f)
             };

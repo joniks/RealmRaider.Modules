@@ -11,6 +11,29 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
         Core
     }
 
+    /// <summary>
+    /// Closed Core adapter vocabulary for existing Sylvan node concepts. These are
+    /// materialization facts only; they do not create encounters or grant rewards.
+    /// </summary>
+    public enum SylvanRealmNodeMaterializationRole
+    {
+        Unknown,
+        PortalStart,
+        WolfGroveEncounter,
+        EntGroveEncounter,
+        MoonwellRecovery,
+        LandmarkJunction,
+        HeartTreeObjective
+    }
+
+    /// <summary>Closed Core adapter vocabulary for existing Sylvan landmark presentation.</summary>
+    public enum SylvanLandmarkVisualRole
+    {
+        Unknown,
+        NodeCanopy,
+        SylvanHeartTree
+    }
+
     public enum RealmLayoutValidationIssue
     {
         RecipeMissing,
@@ -22,6 +45,7 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
         NodeIdDuplicate,
         NodeContentIdInvalid,
         NodeKindInvalid,
+        NodeMaterializationRoleInvalid,
         NodeCoordinateInvalid,
         NodeSpacingInvalid,
         StartNodeCardinalityInvalid,
@@ -33,11 +57,13 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
         EdgeEndpointInvalid,
         EdgeSelfReferenceInvalid,
         EdgeDuplicate,
+        EdgeFloorPathWidthInvalid,
         LandmarkCardinalityInvalid,
         LandmarkMissing,
         LandmarkIdInvalid,
         LandmarkIdDuplicate,
         LandmarkTypeInvalid,
+        LandmarkVisualRoleInvalid,
         LandmarkNodeInvalid,
         ExpansionSocketCardinalityInvalid,
         ExpansionSocketMissing,
@@ -63,12 +89,14 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
             string nodeId,
             string contentId,
             RealmLayoutNodeKind kind,
+            SylvanRealmNodeMaterializationRole materializationRole,
             float x,
             float z)
         {
             NodeId = nodeId;
             ContentId = contentId;
             Kind = kind;
+            MaterializationRole = materializationRole;
             X = x;
             Z = z;
         }
@@ -78,6 +106,8 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
         public string ContentId { get; }
 
         public RealmLayoutNodeKind Kind { get; }
+
+        public SylvanRealmNodeMaterializationRole MaterializationRole { get; }
 
         public float X { get; }
 
@@ -94,12 +124,14 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
             string edgeId,
             string fromNodeId,
             string toNodeId,
-            bool isActivePathSafe)
+            bool isActivePathSafe,
+            float floorPathWidth)
         {
             EdgeId = edgeId;
             FromNodeId = fromNodeId;
             ToNodeId = toNodeId;
             IsActivePathSafe = isActivePathSafe;
+            FloorPathWidth = floorPathWidth;
         }
 
         public string EdgeId { get; }
@@ -109,6 +141,8 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
         public string ToNodeId { get; }
 
         public bool IsActivePathSafe { get; }
+
+        public float FloorPathWidth { get; }
     }
 
     /// <summary>A landmark is attached to one stable recipe node rather than a scene object.</summary>
@@ -117,11 +151,13 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
         public RealmLayoutLandmark(
             string landmarkId,
             string landmarkTypeId,
-            string nodeId)
+            string nodeId,
+            SylvanLandmarkVisualRole visualRole)
         {
             LandmarkId = landmarkId;
             LandmarkTypeId = landmarkTypeId;
             NodeId = nodeId;
+            VisualRole = visualRole;
         }
 
         public string LandmarkId { get; }
@@ -129,6 +165,8 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
         public string LandmarkTypeId { get; }
 
         public string NodeId { get; }
+
+        public SylvanLandmarkVisualRole VisualRole { get; }
     }
 
     /// <summary>An authored future branch anchor, with no automatic expansion behavior.</summary>
@@ -274,6 +312,10 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
 
         public const float MinimumNodeSpacing = 4f;
 
+        public const float MinimumFloorPathWidth = 6f;
+
+        public const float MaximumFloorPathWidth = 8f;
+
         public static RealmLayoutValidationResult Validate(RealmLayoutRecipe recipe)
         {
             var issues = new List<RealmLayoutValidationIssue>();
@@ -345,6 +387,11 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
                     if (node.Kind < RealmLayoutNodeKind.Start || node.Kind > RealmLayoutNodeKind.Core)
                     {
                         AddIssue(issues, RealmLayoutValidationIssue.NodeKindInvalid);
+                    }
+
+                    if (!IsMaterializationRoleValid(node.Kind, node.MaterializationRole))
+                    {
+                        AddIssue(issues, RealmLayoutValidationIssue.NodeMaterializationRoleInvalid);
                     }
 
                     if (!IsCoordinateValid(node.X) || !IsCoordinateValid(node.Z))
@@ -467,6 +514,11 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
                     continue;
                 }
 
+                if (!IsFloorPathWidthValid(edge.FloorPathWidth))
+                {
+                    AddIssue(issues, RealmLayoutValidationIssue.EdgeFloorPathWidthInvalid);
+                }
+
                 if (!endpoints.Add(UndirectedEdgeKey(edge.FromNodeId, edge.ToNodeId)))
                 {
                     AddIssue(issues, RealmLayoutValidationIssue.EdgeDuplicate);
@@ -506,6 +558,11 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
                 if (!HasStableId(landmark.LandmarkTypeId))
                 {
                     AddIssue(issues, RealmLayoutValidationIssue.LandmarkTypeInvalid);
+                }
+
+                if (!IsLandmarkVisualRoleValid(landmark.VisualRole))
+                {
+                    AddIssue(issues, RealmLayoutValidationIssue.LandmarkVisualRoleInvalid);
                 }
 
                 if (!HasStableId(landmark.NodeId) || !nodeIds.Contains(landmark.NodeId))
@@ -658,6 +715,51 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
                 && Math.Abs(value) <= MaximumAbsoluteCoordinate;
         }
 
+        private static bool IsMaterializationRoleValid(
+            RealmLayoutNodeKind kind,
+            SylvanRealmNodeMaterializationRole role)
+        {
+            if (role <= SylvanRealmNodeMaterializationRole.Unknown
+                || role > SylvanRealmNodeMaterializationRole.HeartTreeObjective)
+            {
+                return false;
+            }
+
+            if (kind == RealmLayoutNodeKind.Start)
+            {
+                return role == SylvanRealmNodeMaterializationRole.PortalStart;
+            }
+
+            if (kind == RealmLayoutNodeKind.Core)
+            {
+                return role == SylvanRealmNodeMaterializationRole.HeartTreeObjective;
+            }
+
+            if (kind == RealmLayoutNodeKind.Landmark)
+            {
+                return role == SylvanRealmNodeMaterializationRole.LandmarkJunction;
+            }
+
+            return kind == RealmLayoutNodeKind.Encounter
+                && (role == SylvanRealmNodeMaterializationRole.WolfGroveEncounter
+                    || role == SylvanRealmNodeMaterializationRole.EntGroveEncounter
+                    || role == SylvanRealmNodeMaterializationRole.MoonwellRecovery);
+        }
+
+        private static bool IsFloorPathWidthValid(float value)
+        {
+            return !float.IsNaN(value)
+                && !float.IsInfinity(value)
+                && value >= MinimumFloorPathWidth
+                && value <= MaximumFloorPathWidth;
+        }
+
+        private static bool IsLandmarkVisualRoleValid(SylvanLandmarkVisualRole role)
+        {
+            return role == SylvanLandmarkVisualRole.NodeCanopy
+                || role == SylvanLandmarkVisualRole.SylvanHeartTree;
+        }
+
         private static string UndirectedEdgeKey(string firstNodeId, string secondNodeId)
         {
             return string.CompareOrdinal(firstNodeId, secondNodeId) < 0
@@ -706,23 +808,23 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
                 "Ancient Crossroads",
                 new RealmLayoutNode[]
                 {
-                    Node("ancient.start", "realmraiders.node.start", RealmLayoutNodeKind.Start, 0f, -24f),
-                    Node("ancient.crossroads", "realmraiders.node.crossroads", RealmLayoutNodeKind.Landmark, 0f, -8f),
-                    Node("ancient.wolf-grove", "realmraiders.node.wolf-grove", RealmLayoutNodeKind.Encounter, -14f, 4f),
-                    Node("ancient.moonwell", "realmraiders.node.moonwell", RealmLayoutNodeKind.Encounter, 14f, 4f),
-                    Node("ancient.core", "realmraiders.node.heart-tree", RealmLayoutNodeKind.Core, 0f, 20f)
+                    Node("ancient.start", "realmraiders.node.start", RealmLayoutNodeKind.Start, SylvanRealmNodeMaterializationRole.PortalStart, 0f, -24f),
+                    Node("ancient.crossroads", "realmraiders.node.crossroads", RealmLayoutNodeKind.Landmark, SylvanRealmNodeMaterializationRole.LandmarkJunction, 0f, -8f),
+                    Node("ancient.wolf-grove", "realmraiders.node.wolf-grove", RealmLayoutNodeKind.Encounter, SylvanRealmNodeMaterializationRole.WolfGroveEncounter, -14f, 4f),
+                    Node("ancient.moonwell", "realmraiders.node.moonwell", RealmLayoutNodeKind.Encounter, SylvanRealmNodeMaterializationRole.MoonwellRecovery, 14f, 4f),
+                    Node("ancient.core", "realmraiders.node.heart-tree", RealmLayoutNodeKind.Core, SylvanRealmNodeMaterializationRole.HeartTreeObjective, 0f, 20f)
                 },
                 new RealmLayoutEdge[]
                 {
-                    Edge("ancient.start-crossroads", "ancient.start", "ancient.crossroads", true),
-                    Edge("ancient.crossroads-wolf", "ancient.crossroads", "ancient.wolf-grove", false),
-                    Edge("ancient.crossroads-moonwell", "ancient.crossroads", "ancient.moonwell", false),
-                    Edge("ancient.crossroads-core", "ancient.crossroads", "ancient.core", true)
+                    Edge("ancient.start-crossroads", "ancient.start", "ancient.crossroads", true, 7f),
+                    Edge("ancient.crossroads-wolf", "ancient.crossroads", "ancient.wolf-grove", false, 6f),
+                    Edge("ancient.crossroads-moonwell", "ancient.crossroads", "ancient.moonwell", false, 6f),
+                    Edge("ancient.crossroads-core", "ancient.crossroads", "ancient.core", true, 7f)
                 },
                 new RealmLayoutLandmark[]
                 {
-                    new RealmLayoutLandmark("ancient.crossroads.great-oak", "realmraiders.landmark.great-oak", "ancient.crossroads"),
-                    new RealmLayoutLandmark("ancient.core.heart-tree", "realmraiders.landmark.heart-tree", "ancient.core")
+                    new RealmLayoutLandmark("ancient.crossroads.great-oak", "realmraiders.landmark.great-oak", "ancient.crossroads", SylvanLandmarkVisualRole.NodeCanopy),
+                    new RealmLayoutLandmark("ancient.core.heart-tree", "realmraiders.landmark.heart-tree", "ancient.core", SylvanLandmarkVisualRole.SylvanHeartTree)
                 },
                 new RealmLayoutExpansionSocket[]
                 {
@@ -738,24 +840,24 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
                 "Forked Canopy",
                 new RealmLayoutNode[]
                 {
-                    Node("canopy.start", "realmraiders.node.start", RealmLayoutNodeKind.Start, -16f, -24f),
-                    Node("canopy.fork", "realmraiders.node.canopy-fork", RealmLayoutNodeKind.Landmark, -8f, -8f),
-                    Node("canopy.high-path", "realmraiders.node.high-canopy", RealmLayoutNodeKind.Encounter, -18f, 8f),
-                    Node("canopy.low-path", "realmraiders.node.root-basin", RealmLayoutNodeKind.Encounter, 8f, 4f),
-                    Node("canopy.core", "realmraiders.node.heart-tree", RealmLayoutNodeKind.Core, 12f, 22f)
+                    Node("canopy.start", "realmraiders.node.start", RealmLayoutNodeKind.Start, SylvanRealmNodeMaterializationRole.PortalStart, -16f, -24f),
+                    Node("canopy.fork", "realmraiders.node.canopy-fork", RealmLayoutNodeKind.Landmark, SylvanRealmNodeMaterializationRole.LandmarkJunction, -8f, -8f),
+                    Node("canopy.high-path", "realmraiders.node.high-canopy", RealmLayoutNodeKind.Encounter, SylvanRealmNodeMaterializationRole.WolfGroveEncounter, -18f, 8f),
+                    Node("canopy.low-path", "realmraiders.node.root-basin", RealmLayoutNodeKind.Encounter, SylvanRealmNodeMaterializationRole.EntGroveEncounter, 8f, 4f),
+                    Node("canopy.core", "realmraiders.node.heart-tree", RealmLayoutNodeKind.Core, SylvanRealmNodeMaterializationRole.HeartTreeObjective, 12f, 22f)
                 },
                 new RealmLayoutEdge[]
                 {
-                    Edge("canopy.start-fork", "canopy.start", "canopy.fork", true),
-                    Edge("canopy.fork-high", "canopy.fork", "canopy.high-path", false),
-                    Edge("canopy.fork-low", "canopy.fork", "canopy.low-path", true),
-                    Edge("canopy.high-core", "canopy.high-path", "canopy.core", false),
-                    Edge("canopy.low-core", "canopy.low-path", "canopy.core", true)
+                    Edge("canopy.start-fork", "canopy.start", "canopy.fork", true, 7f),
+                    Edge("canopy.fork-high", "canopy.fork", "canopy.high-path", false, 6f),
+                    Edge("canopy.fork-low", "canopy.fork", "canopy.low-path", true, 7f),
+                    Edge("canopy.high-core", "canopy.high-path", "canopy.core", false, 6f),
+                    Edge("canopy.low-core", "canopy.low-path", "canopy.core", true, 7f)
                 },
                 new RealmLayoutLandmark[]
                 {
-                    new RealmLayoutLandmark("canopy.fork.watchtree", "realmraiders.landmark.watchtree", "canopy.fork"),
-                    new RealmLayoutLandmark("canopy.core.heart-tree", "realmraiders.landmark.heart-tree", "canopy.core")
+                    new RealmLayoutLandmark("canopy.fork.watchtree", "realmraiders.landmark.watchtree", "canopy.fork", SylvanLandmarkVisualRole.NodeCanopy),
+                    new RealmLayoutLandmark("canopy.core.heart-tree", "realmraiders.landmark.heart-tree", "canopy.core", SylvanLandmarkVisualRole.SylvanHeartTree)
                 },
                 new RealmLayoutExpansionSocket[]
                 {
@@ -771,23 +873,23 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
                 "Serpent Roots",
                 new RealmLayoutNode[]
                 {
-                    Node("serpent.start", "realmraiders.node.start", RealmLayoutNodeKind.Start, -18f, -24f),
-                    Node("serpent.east-turn", "realmraiders.node.root-turn", RealmLayoutNodeKind.Encounter, 14f, -12f),
-                    Node("serpent.west-turn", "realmraiders.node.root-turn", RealmLayoutNodeKind.Landmark, -14f, 0f),
-                    Node("serpent.guardian", "realmraiders.node.ent-grove", RealmLayoutNodeKind.Encounter, 14f, 12f),
-                    Node("serpent.core", "realmraiders.node.heart-tree", RealmLayoutNodeKind.Core, -10f, 24f)
+                    Node("serpent.start", "realmraiders.node.start", RealmLayoutNodeKind.Start, SylvanRealmNodeMaterializationRole.PortalStart, -18f, -24f),
+                    Node("serpent.east-turn", "realmraiders.node.root-turn", RealmLayoutNodeKind.Encounter, SylvanRealmNodeMaterializationRole.WolfGroveEncounter, 14f, -12f),
+                    Node("serpent.west-turn", "realmraiders.node.root-turn", RealmLayoutNodeKind.Landmark, SylvanRealmNodeMaterializationRole.LandmarkJunction, -14f, 0f),
+                    Node("serpent.guardian", "realmraiders.node.ent-grove", RealmLayoutNodeKind.Encounter, SylvanRealmNodeMaterializationRole.EntGroveEncounter, 14f, 12f),
+                    Node("serpent.core", "realmraiders.node.heart-tree", RealmLayoutNodeKind.Core, SylvanRealmNodeMaterializationRole.HeartTreeObjective, -10f, 24f)
                 },
                 new RealmLayoutEdge[]
                 {
-                    Edge("serpent.start-east", "serpent.start", "serpent.east-turn", true),
-                    Edge("serpent.east-west", "serpent.east-turn", "serpent.west-turn", true),
-                    Edge("serpent.west-guardian", "serpent.west-turn", "serpent.guardian", true),
-                    Edge("serpent.guardian-core", "serpent.guardian", "serpent.core", true)
+                    Edge("serpent.start-east", "serpent.start", "serpent.east-turn", true, 7f),
+                    Edge("serpent.east-west", "serpent.east-turn", "serpent.west-turn", true, 7f),
+                    Edge("serpent.west-guardian", "serpent.west-turn", "serpent.guardian", true, 7f),
+                    Edge("serpent.guardian-core", "serpent.guardian", "serpent.core", true, 7f)
                 },
                 new RealmLayoutLandmark[]
                 {
-                    new RealmLayoutLandmark("serpent.west-turn.root-arch", "realmraiders.landmark.root-arch", "serpent.west-turn"),
-                    new RealmLayoutLandmark("serpent.core.heart-tree", "realmraiders.landmark.heart-tree", "serpent.core")
+                    new RealmLayoutLandmark("serpent.west-turn.root-arch", "realmraiders.landmark.root-arch", "serpent.west-turn", SylvanLandmarkVisualRole.NodeCanopy),
+                    new RealmLayoutLandmark("serpent.core.heart-tree", "realmraiders.landmark.heart-tree", "serpent.core", SylvanLandmarkVisualRole.SylvanHeartTree)
                 },
                 new RealmLayoutExpansionSocket[]
                 {
@@ -800,19 +902,21 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
             string nodeId,
             string contentId,
             RealmLayoutNodeKind kind,
+            SylvanRealmNodeMaterializationRole materializationRole,
             float x,
             float z)
         {
-            return new RealmLayoutNode(nodeId, contentId, kind, x, z);
+            return new RealmLayoutNode(nodeId, contentId, kind, materializationRole, x, z);
         }
 
         private static RealmLayoutEdge Edge(
             string edgeId,
             string fromNodeId,
             string toNodeId,
-            bool isActivePathSafe)
+            bool isActivePathSafe,
+            float floorPathWidth)
         {
-            return new RealmLayoutEdge(edgeId, fromNodeId, toNodeId, isActivePathSafe);
+            return new RealmLayoutEdge(edgeId, fromNodeId, toNodeId, isActivePathSafe, floorPathWidth);
         }
     }
 
