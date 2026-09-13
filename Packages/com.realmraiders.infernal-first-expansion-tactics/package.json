@@ -1,0 +1,10 @@
+{
+  "name": "com.realmraiders.infernal-first-expansion-tactics",
+  "version": "0.1.0",
+  "displayName": "Infernal First Expansion Tactics",
+  "description": "Exact no-engine tactical intent for the three Infernal first-expansion sites.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-first-expansion-content": "0.1.0"
+  }
+}
