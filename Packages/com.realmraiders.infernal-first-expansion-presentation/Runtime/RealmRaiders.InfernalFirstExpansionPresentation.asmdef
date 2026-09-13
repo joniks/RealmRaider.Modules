@@ -1,0 +1,9 @@
+{
+  "name": "RealmRaiders.InfernalFirstExpansionPresentation",
+  "rootNamespace": "RealmRaiders.Modules.InfernalFirstExpansionPresentation",
+  "references": [
+    "RealmRaiders.InfernalFirstExpansionContent"
+  ],
+  "autoReferenced": false,
+  "noEngineReferences": true
+}
