@@ -72,10 +72,10 @@ namespace RealmRaiders.Modules.RealmGrowthContracts.Tests
                 new[]
                 {
                     RealmGrowthTierValidationIssue.TierIdDuplicate,
+                    RealmGrowthTierValidationIssue.ExpansionAnchorCapacityNegative,
                     RealmGrowthTierValidationIssue.MinimumLevelNotStrictlyIncreasing,
                     RealmGrowthTierValidationIssue.FootprintBudgetDecreases,
                     RealmGrowthTierValidationIssue.NodeBudgetDecreases,
-                    RealmGrowthTierValidationIssue.ExpansionAnchorCapacityNegative,
                     RealmGrowthTierValidationIssue.MinimumLevelNegative,
                     RealmGrowthTierValidationIssue.FootprintBudgetNonPositive,
                     RealmGrowthTierValidationIssue.NodeBudgetNonPositive
