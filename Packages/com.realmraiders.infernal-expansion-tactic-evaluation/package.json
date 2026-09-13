@@ -1,0 +1,10 @@
+{
+  "name": "com.realmraiders.infernal-expansion-tactic-evaluation",
+  "version": "0.1.0",
+  "displayName": "Infernal Expansion Tactic Evaluation",
+  "description": "Immutable no-engine trigger evaluation over exact cached Infernal expansion tactic recipes.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-first-expansion-tactics": "0.1.0"
+  }
+}

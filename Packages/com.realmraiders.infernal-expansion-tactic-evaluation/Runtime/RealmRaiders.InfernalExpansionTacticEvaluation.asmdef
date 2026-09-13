@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.InfernalExpansionTacticEvaluation",
+  "rootNamespace": "RealmRaiders.Modules.InfernalExpansionTacticEvaluation",
+  "references": [
+    "RealmRaiders.InfernalFirstExpansionTactics"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
