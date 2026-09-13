@@ -1,0 +1,13 @@
+{
+  "name": "com.realmraiders.sylvan-first-expansion-encounters",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Sylvan First Expansion Encounters",
+  "description": "Exact authored first-expansion encounter and recovery facts for accepted Sylvan layouts.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.starter-realm-layouts": "0.2.2"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}
