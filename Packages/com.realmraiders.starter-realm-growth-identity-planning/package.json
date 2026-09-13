@@ -1,0 +1,19 @@
+{
+  "name": "com.realmraiders.starter-realm-growth-identity-planning",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Starter Realm Growth Identity Planning",
+  "description": "Composes exact starter-realm identity and faction-neutral expansion planning evidence.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.starter-realm-identity-planning": "0.1.0",
+    "com.realmraiders.starter-realm-identity-record": "0.1.0",
+    "com.realmraiders.realm-expansion-planning": "0.1.0",
+    "com.realmraiders.realm-growth-contracts": "0.1.0",
+    "com.realmraiders.realm-layout-contracts": "0.1.0",
+    "com.realmraiders.starter-realm-layouts": "0.2.2",
+    "com.realmraiders.infernal-defense-layouts": "0.1.0"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

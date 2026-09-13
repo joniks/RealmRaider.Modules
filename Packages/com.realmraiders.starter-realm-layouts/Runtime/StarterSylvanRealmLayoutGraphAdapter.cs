@@ -11,6 +11,37 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
     /// </summary>
     public static class StarterSylvanRealmLayoutGraphAdapter
     {
+        private static readonly IReadOnlyList<RealmLayoutGraph> CachedGraphs =
+            BuildCachedGraphs();
+
+        /// <summary>
+        /// Returns the one graph identity associated with an exact cached recipe.
+        /// Equal-field recipe copies deliberately do not receive a graph token.
+        /// </summary>
+        public static RealmLayoutGraph AdaptExactCached(RealmLayoutRecipe recipe)
+        {
+            if (recipe == null)
+            {
+                return null;
+            }
+
+            var resolved = StarterSylvanRealmLayoutResolver.ResolveExact(recipe.LayoutId);
+            if (!resolved.HasRecipe || !ReferenceEquals(resolved.Recipe, recipe))
+            {
+                return null;
+            }
+
+            for (var index = 0; index < StarterSylvanRealmLayouts.All.Count; index++)
+            {
+                if (ReferenceEquals(StarterSylvanRealmLayouts.All[index], recipe))
+                {
+                    return CachedGraphs[index];
+                }
+            }
+
+            return null;
+        }
+
         public static RealmLayoutGraph Adapt(RealmLayoutRecipe recipe)
         {
             if (recipe == null)
@@ -25,6 +56,17 @@ namespace RealmRaiders.Modules.StarterRealmLayouts
                 AdaptEdges(recipe.Edges),
                 AdaptLandmarks(recipe.Landmarks),
                 AdaptExpansionSockets(recipe.ExpansionSockets));
+        }
+
+        private static IReadOnlyList<RealmLayoutGraph> BuildCachedGraphs()
+        {
+            var graphs = new RealmLayoutGraph[StarterSylvanRealmLayouts.All.Count];
+            for (var index = 0; index < graphs.Length; index++)
+            {
+                graphs[index] = Adapt(StarterSylvanRealmLayouts.All[index]);
+            }
+
+            return Array.AsReadOnly(graphs);
         }
 
         private static IReadOnlyList<RealmLayoutGraphNode> AdaptNodes(

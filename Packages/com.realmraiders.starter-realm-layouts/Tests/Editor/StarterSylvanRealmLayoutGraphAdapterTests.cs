@@ -118,6 +118,19 @@ namespace RealmRaiders.Modules.StarterRealmLayouts.Tests
         }
 
         [Test]
+        public void AdaptExactCached_ReturnsOneTokenOnlyForTheExactCachedRecipe()
+        {
+            var source = StarterSylvanRealmLayouts.ForkedCanopy;
+            var first = StarterSylvanRealmLayoutGraphAdapter.AdaptExactCached(source);
+            var second = StarterSylvanRealmLayoutGraphAdapter.AdaptExactCached(source);
+            var copy = CopyRecipe(source, source.Nodes, source.Landmarks);
+
+            Assert.That(first, Is.Not.Null);
+            Assert.That(second, Is.SameAs(first));
+            Assert.That(StarterSylvanRealmLayoutGraphAdapter.AdaptExactCached(copy), Is.Null);
+        }
+
+        [Test]
         public void Adapt_FailsClosedForInvalidEnumAndNullElements()
         {
             var source = StarterSylvanRealmLayouts.AncientCrossroads;

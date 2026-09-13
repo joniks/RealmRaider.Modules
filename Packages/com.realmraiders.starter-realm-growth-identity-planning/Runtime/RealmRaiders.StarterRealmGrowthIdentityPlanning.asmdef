@@ -1,0 +1,16 @@
+{
+  "name": "RealmRaiders.StarterRealmGrowthIdentityPlanning",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmGrowthIdentityPlanning",
+  "references": [
+    "RealmRaiders.StarterRealmIdentityPlanning",
+    "RealmRaiders.StarterRealmIdentityRecord",
+    "RealmRaiders.RealmExpansionPlanning",
+    "RealmRaiders.RealmGrowthContracts",
+    "RealmRaiders.RealmLayoutContracts",
+    "RealmRaiders.StarterRealmLayouts",
+    "RealmRaiders.InfernalDefenseLayouts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

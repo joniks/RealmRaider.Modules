@@ -28,6 +28,30 @@ namespace RealmRaiders.Modules.StarterRealmIdentityRecord.Tests
         }
 
         [Test]
+        public void RealmInstanceId_AcceptsExactlyLowercase32HexAndRejectsVariants()
+        {
+            const string instanceId = "0123456789abcdef0123456789abcdef";
+            var created = StarterRealmIdentityCodec.Create(1, instanceId, 3, LayoutId);
+            var parsed = StarterRealmIdentityCodec.ParseCanonicalUtf8(
+                StarterRealmIdentityCodec.SerializeCanonicalUtf8(created.Record));
+
+            Assert.That(created.HasRecord, Is.True);
+            Assert.That(parsed.HasRecord, Is.True);
+            AssertIssues(
+                StarterRealmIdentityCodec.Create(1, instanceId.ToUpperInvariant(), 3, LayoutId),
+                StarterRealmIdentityIssue.RealmIdNonCanonical);
+            AssertIssues(
+                StarterRealmIdentityCodec.Create(1, "0123456789abcdef0123456789abcdeg", 3, LayoutId),
+                StarterRealmIdentityIssue.RealmIdMalformed);
+            AssertIssues(
+                StarterRealmIdentityCodec.Create(1, "0123456789abcdef0123456789abcde", 3, LayoutId),
+                StarterRealmIdentityIssue.RealmIdMalformed);
+            AssertIssues(
+                StarterRealmIdentityCodec.Create(1, RealmId, 3, instanceId),
+                StarterRealmIdentityIssue.LayoutIdMalformed);
+        }
+
+        [Test]
         public void Serialization_HasExactCanonicalTextAndUtf8BytesWithoutBom()
         {
             var record = ValidRecord(-17);

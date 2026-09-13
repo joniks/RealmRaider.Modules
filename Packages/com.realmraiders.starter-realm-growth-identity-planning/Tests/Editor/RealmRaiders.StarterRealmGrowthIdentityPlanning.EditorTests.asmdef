@@ -1,0 +1,20 @@
+{
+  "name": "RealmRaiders.StarterRealmGrowthIdentityPlanning.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmGrowthIdentityPlanning.Tests",
+  "references": [
+    "RealmRaiders.StarterRealmGrowthIdentityPlanning",
+    "RealmRaiders.StarterRealmIdentityPlanning",
+    "RealmRaiders.StarterRealmIdentityRecord",
+    "RealmRaiders.StarterRealmSeededSelection",
+    "RealmRaiders.RealmExpansionPlanning",
+    "RealmRaiders.RealmGrowthContracts",
+    "RealmRaiders.RealmLayoutContracts",
+    "RealmRaiders.StarterRealmLayouts",
+    "RealmRaiders.InfernalDefenseLayouts"
+  ],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

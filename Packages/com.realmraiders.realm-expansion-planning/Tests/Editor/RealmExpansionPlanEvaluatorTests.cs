@@ -16,9 +16,10 @@ namespace RealmRaiders.Modules.RealmExpansionPlanning.Tests
                  capacity <= layout.ExpansionSockets.Count;
                  capacity++)
             {
+                var tier = ValidTier(capacity);
                 var result = RealmExpansionPlanEvaluator.Evaluate(
                     layout,
-                    ValidTier(capacity));
+                    tier);
 
                 Assert.That(result.HasPlan, Is.True, layout.LayoutId + " @ " + capacity);
                 Assert.That(result.Status, Is.EqualTo(RealmExpansionPlanStatus.Planned));
@@ -27,6 +28,8 @@ namespace RealmRaiders.Modules.RealmExpansionPlanning.Tests
                 Assert.That(result.Plan.ExpansionSockets.Count, Is.EqualTo(capacity));
                 Assert.That(result.LayoutValidation.IsValid, Is.True);
                 Assert.That(result.TierValidation.IsValid, Is.True);
+                Assert.That(result.SourceLayout, Is.SameAs(layout));
+                Assert.That(result.SourceTier, Is.SameAs(tier));
                 for (var index = 0; index < capacity; index++)
                 {
                     Assert.That(

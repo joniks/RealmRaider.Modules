@@ -74,13 +74,17 @@ namespace RealmRaiders.Modules.RealmExpansionPlanning
             RealmExpansionPlan plan,
             IReadOnlyList<RealmExpansionPlanIssue> issues,
             RealmLayoutGraphValidationResult layoutValidation,
-            RealmGrowthTierValidationResult tierValidation)
+            RealmGrowthTierValidationResult tierValidation,
+            RealmLayoutGraph sourceLayout,
+            RealmGrowthTier sourceTier)
         {
             Status = status;
             Plan = plan;
             Issues = Snapshot(issues);
             LayoutValidation = layoutValidation;
             TierValidation = tierValidation;
+            SourceLayout = sourceLayout;
+            SourceTier = sourceTier;
         }
 
         public RealmExpansionPlanStatus Status { get; }
@@ -93,9 +97,16 @@ namespace RealmRaiders.Modules.RealmExpansionPlanning
 
         public RealmGrowthTierValidationResult TierValidation { get; }
 
+        /// <summary>Exact caller-owned inputs used to evaluate this immutable result.</summary>
+        public RealmLayoutGraph SourceLayout { get; }
+
+        public RealmGrowthTier SourceTier { get; }
+
         public bool HasPlan => Status == RealmExpansionPlanStatus.Planned
             && Plan != null
             && Issues.Count == 0
+            && SourceLayout != null
+            && SourceTier != null
             && LayoutValidation != null
             && LayoutValidation.IsValid
             && TierValidation != null
@@ -149,7 +160,9 @@ namespace RealmRaiders.Modules.RealmExpansionPlanning
                     null,
                     issues,
                     layoutValidation,
-                    tierValidation);
+                    tierValidation,
+                    layout,
+                    tier);
             }
 
             var selected = new RealmLayoutGraphExpansionSocket[
@@ -164,7 +177,9 @@ namespace RealmRaiders.Modules.RealmExpansionPlanning
                 new RealmExpansionPlan(layout.LayoutId, tier.TierId, selected),
                 Array.AsReadOnly(Array.Empty<RealmExpansionPlanIssue>()),
                 layoutValidation,
-                tierValidation);
+                tierValidation,
+                layout,
+                tier);
         }
 
         private static RealmLayoutGraphValidationResult ValidateLayout(

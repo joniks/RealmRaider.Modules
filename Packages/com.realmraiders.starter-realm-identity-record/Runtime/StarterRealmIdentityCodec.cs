@@ -313,7 +313,7 @@ namespace RealmRaiders.Modules.StarterRealmIdentityRecord
             int fieldIndex,
             ICollection<StarterRealmIdentityIssueEvidence> evidence)
         {
-            var classification = ClassifyId(value);
+            var classification = ClassifyId(value, isRealmId);
             if (classification == IdClassification.Valid)
             {
                 return;
@@ -333,25 +333,30 @@ namespace RealmRaiders.Modules.StarterRealmIdentityRecord
             AddEvidence(evidence, issue, fieldIndex, fieldName, value);
         }
 
-        private static IdClassification ClassifyId(string value)
+        private static IdClassification ClassifyId(string value, bool isRealmId)
         {
             if (string.IsNullOrEmpty(value))
             {
                 return IdClassification.Missing;
             }
 
-            if (IsCanonicalId(value))
+            if (IsCanonicalId(value, isRealmId))
             {
                 return IdClassification.Valid;
             }
 
-            return IsCanonicalId(NormalizeAsciiCandidate(value))
+            return IsCanonicalId(NormalizeAsciiCandidate(value), isRealmId)
                 ? IdClassification.NonCanonical
                 : IdClassification.Malformed;
         }
 
-        private static bool IsCanonicalId(string value)
+        private static bool IsCanonicalId(string value, bool isRealmId)
         {
+            if (isRealmId && IsLowerHexRealmInstanceId(value))
+            {
+                return true;
+            }
+
             if (string.IsNullOrEmpty(value)
                 || value.Length < StarterRealmIdentityRecordContract.MinimumIdCharacters
                 || value.Length > StarterRealmIdentityRecordContract.MaximumIdCharacters
@@ -382,6 +387,26 @@ namespace RealmRaiders.Modules.StarterRealmIdentityRecord
             }
 
             return containsNamespaceSeparator && !previousWasSeparator;
+        }
+
+        private static bool IsLowerHexRealmInstanceId(string value)
+        {
+            if (value == null || value.Length != 32)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < value.Length; index++)
+            {
+                var symbol = value[index];
+                if (!((symbol >= '0' && symbol <= '9')
+                    || (symbol >= 'a' && symbol <= 'f')))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static string NormalizeAsciiCandidate(string value)
