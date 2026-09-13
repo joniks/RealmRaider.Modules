@@ -1,0 +1,10 @@
+{
+  "name": "com.realmraiders.infernal-expansion-tactic-presentation",
+  "version": "0.1.0",
+  "displayName": "Infernal Expansion Tactic Presentation",
+  "description": "Exact no-engine telegraph presentation facts for cached Infernal expansion tactics.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.infernal-first-expansion-tactics": "0.1.0"
+  }
+}

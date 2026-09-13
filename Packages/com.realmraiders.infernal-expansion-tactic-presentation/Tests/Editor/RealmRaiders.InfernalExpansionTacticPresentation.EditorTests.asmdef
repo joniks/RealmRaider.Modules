@@ -1,0 +1,17 @@
+{
+  "name": "RealmRaiders.InfernalExpansionTacticPresentation.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.InfernalExpansionTacticPresentation.Tests",
+  "references": [
+    "RealmRaiders.InfernalExpansionTacticPresentation",
+    "RealmRaiders.InfernalFirstExpansionTactics"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
