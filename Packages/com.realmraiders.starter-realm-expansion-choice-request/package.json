@@ -1,0 +1,18 @@
+{
+  "name": "com.realmraiders.starter-realm-expansion-choice-request",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Starter Realm Expansion Choice Request",
+  "description": "Pure exact authored-socket choice validation over successful starter realm growth plans.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.starter-realm-growth-identity-planning": "0.1.0",
+    "com.realmraiders.starter-realm-identity-planning": "0.1.0",
+    "com.realmraiders.realm-expansion-planning": "0.1.0",
+    "com.realmraiders.realm-growth-contracts": "0.1.0",
+    "com.realmraiders.realm-layout-contracts": "0.1.0",
+    "com.realmraiders.starter-realm-layouts": "0.2.2"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

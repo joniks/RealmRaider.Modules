@@ -1,0 +1,13 @@
+{
+  "name": "RealmRaiders.StarterRealmExpansionChoiceRequest",
+  "rootNamespace": "RealmRaiders.Modules.StarterRealmExpansionChoiceRequest",
+  "references": [
+    "RealmRaiders.StarterRealmGrowthIdentityPlanning",
+    "RealmRaiders.RealmExpansionPlanning",
+    "RealmRaiders.RealmLayoutContracts",
+    "RealmRaiders.StarterRealmLayouts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
