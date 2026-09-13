@@ -1,0 +1,13 @@
+{
+  "name": "RealmRaiders.SylvanFirstExpansionPresentation.EditorTests",
+  "rootNamespace": "RealmRaiders.Modules.SylvanFirstExpansionPresentation.Tests",
+  "references": [
+    "RealmRaiders.SylvanFirstExpansionPresentation",
+    "RealmRaiders.StarterRealmLayouts"
+  ],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}

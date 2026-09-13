@@ -1,0 +1,13 @@
+{
+  "name": "com.realmraiders.sylvan-first-expansion-presentation",
+  "version": "0.1.0",
+  "displayName": "Realm Raiders Sylvan First Expansion Presentation",
+  "description": "Exact lightweight presentation facts for the three authored Sylvan first expansion groves.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.realmraiders.starter-realm-layouts": "0.2.2"
+  },
+  "author": {
+    "name": "Realm Raiders"
+  }
+}

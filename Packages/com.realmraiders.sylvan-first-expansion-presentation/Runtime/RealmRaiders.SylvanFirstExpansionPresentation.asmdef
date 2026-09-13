@@ -1,0 +1,10 @@
+{
+  "name": "RealmRaiders.SylvanFirstExpansionPresentation",
+  "rootNamespace": "RealmRaiders.Modules.SylvanFirstExpansionPresentation",
+  "references": [
+    "RealmRaiders.StarterRealmLayouts"
+  ],
+  "autoReferenced": false,
+  "overrideReferences": false,
+  "noEngineReferences": true
+}
